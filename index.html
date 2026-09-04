@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Lancieux · Compagnon de jeu</title>
+<style>
+  :root{
+    --sea: #0e6e63;
+    --sea-deep: #0a4f47;
+    --sand: #e8dcc2;
+    --sand-line: #cfc09a;
+    --ink: #1c2624;
+    --paper: #f6f2e7;
+    --accent: #c0722f;
+    --ok: #2f7a4f;
+    --bad: #a33;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    -webkit-font-smoothing: antialiased;
+    min-height:100vh;
+    padding-bottom: 40px;
+  }
+  header{
+    background: linear-gradient(180deg, var(--sea) 0%, var(--sea-deep) 100%);
+    color: var(--paper);
+    padding: 16px 20px 0;
+    border-bottom: 4px solid var(--sand);
+  }
+  header .place{
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    opacity: 0.8;
+    margin: 0 0 2px;
+  }
+  header h1{
+    margin: 0 0 14px;
+    font-size: 24px;
+    font-weight: 400;
+    font-family: 'Palatino Linotype', Georgia, serif;
+  }
+  nav{
+    display:flex;
+  }
+  nav button{
+    flex:1;
+    background:none;
+    border:none;
+    color: rgba(246,242,231,0.65);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 4px 12px;
+    border-bottom: 3px solid transparent;
+    cursor:pointer;
+  }
+  nav button.active{
+    color: var(--paper);
+    border-bottom-color: var(--sand);
+  }
+  main{
+    max-width: 460px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  /* ---- Distance tab ---- */
+  .hole-strip{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding: 14px 0 6px;
+  }
+  .hole-btn{
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--sea);
+    background: var(--paper);
+    color: var(--sea-deep);
+    font-size: 16px;
+    font-family: inherit;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .hole-btn.active{ background: var(--sea); color: var(--paper); }
+  .hole-name{ text-align:center; font-size: 15px; color:#5a5248; margin: 2px 0 18px; }
+  .stage{
+    background: white;
+    border: 1px solid var(--sand-line);
+    border-radius: 4px;
+    padding: 26px 20px 20px;
+    text-align: center;
+  }
+  .distance-num{
+    font-size: 80px;
+    line-height: 1;
+    color: var(--sea-deep);
+    font-variant-numeric: tabular-nums;
+  }
+  .distance-unit{ font-size: 18px; color:#8a8175; margin-top: 2px; }
+  .targets{
+    display:flex; justify-content:center; gap: 22px;
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--sand);
+  }
+  .target{ font-size: 14px; color:#5a5248; }
+  .target b{ display:block; font-size: 22px; color: var(--ink); font-weight: 400; }
+  .status{ margin-top: 12px; font-size: 12px; color: #9a9182; }
+  .status.err{ color: var(--bad); }
+  .calib{ background: var(--sand); border-radius: 4px; padding: 16px; margin-top:12px; }
+  .calib p{ margin: 0 0 12px; font-size: 13px; color:#5a5248; line-height:1.5; }
+  .calib-row{ display:flex; gap:8px; }
+  .calib-btn{
+    flex:1; font-family: inherit; font-size: 13px; padding: 12px 4px;
+    border-radius: 3px; border: 1px solid var(--sea); background: white; color: var(--sea-deep); cursor:pointer;
+  }
+  .calib-btn.set{ background: var(--ok); border-color: var(--ok); color: white; }
+  .toggle-calib{
+    display:block; text-align:center; margin: 16px auto 0; background:none; border:none;
+    color: var(--accent); font-family: inherit; font-size: 13px; text-decoration: underline; cursor:pointer;
+  }
+
+  /* ---- Wind tab ---- */
+  .wind-card{
+    background: white; border: 1px solid var(--sand-line); border-radius: 4px;
+    padding: 30px 20px; text-align:center; margin-top: 16px;
+  }
+  .compass{ width: 160px; height:160px; margin: 0 auto 18px; position:relative; }
+  .compass svg{ width:100%; height:100%; }
+  .wind-speed{ font-size: 56px; color: var(--sea-deep); line-height:1; }
+  .wind-unit{ font-size: 16px; color:#8a8175; }
+  .wind-dir-label{ font-size: 15px; color:#5a5248; margin-top: 10px; }
+  .wind-updated{ font-size: 12px; color:#9a9182; margin-top: 14px; }
+  .refresh-btn{
+    margin-top: 14px; font-family: inherit; font-size: 13px; padding: 10px 18px;
+    border-radius: 3px; border: 1px solid var(--sea); background: white; color: var(--sea-deep); cursor:pointer;
+  }
+
+  /* ---- Scorecard tab ---- */
+  table.score{ width:100%; border-collapse: collapse; margin-top: 16px; background:white; border:1px solid var(--sand-line);}
+  table.score th, table.score td{
+    padding: 8px 4px; text-align:center; font-size: 14px; border-bottom: 1px solid var(--sand);
+  }
+  table.score th{ font-weight:400; color:#8a8175; font-size:12px; }
+  table.score input{
+    width: 40px; text-align:center; font-family: inherit; font-size: 15px;
+    border: 1px solid var(--sand-line); border-radius: 3px; padding: 4px 2px; background: var(--paper);
+  }
+  .score-summary{
+    display:flex; justify-content: space-around; margin-top: 14px;
+    background: var(--sand); border-radius: 4px; padding: 14px;
+  }
+  .score-summary div{ text-align:center; }
+  .score-summary b{ display:block; font-size:22px; }
+  .score-summary span{ font-size:12px; color:#5a5248; }
+
+  .section-title{ font-size: 13px; letter-spacing: 0.03em; color:#8a8175; margin: 22px 4px 8px; }
+  .io-row{ display:flex; gap:8px; margin-top: 16px; }
+  .io-btn{
+    flex:1; font-family: inherit; font-size: 13px; padding: 9px 6px; border-radius: 3px;
+    border: 1px solid var(--sand-line); background: transparent; color: #5a5248; cursor:pointer;
+  }
+  textarea{
+    width:100%; font-family: monospace; font-size: 11px; margin-top: 10px; padding: 8px;
+    border: 1px solid var(--sand-line); border-radius: 3px; background: white; display:none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="place">Golf de Lancieux · La Buglais, 22770 Lancieux</p>
+  <h1>Compagnon de jeu</h1>
+  <nav>
+    <button class="tab-btn active" data-tab="distance">Distance</button>
+    <button class="tab-btn" data-tab="wind">Vent</button>
+    <button class="tab-btn" data-tab="score">Scorecard</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ===== DISTANCE ===== -->
+  <section class="view active" id="view-distance">
+    <div class="hole-strip" id="holeStrip"></div>
+    <div class="hole-name" id="holeName">Trou 1</div>
+
+    <div class="stage">
+      <div class="distance-num" id="distMain">--</div>
+      <div class="distance-unit">mètres jusqu'au milieu du green</div>
+      <div class="targets">
+        <div class="target"><b id="distFront">--</b>avant</div>
+        <div class="target"><b id="distMid">--</b>milieu</div>
+        <div class="target"><b id="distBack">--</b>fond</div>
+      </div>
+      <div class="status" id="gpsStatus">Localisation en cours…</div>
+    </div>
+
+    <button class="toggle-calib" id="toggleCalib">Calibrer ce trou</button>
+
+    <div class="calib" id="calibPanel" style="display:none;">
+      <p>Tiens-toi à l'endroit voulu sur le trou <span id="calibHoleNum">1</span>, puis appuie sur le bouton correspondant pour enregistrer ta position GPS actuelle comme repère.</p>
+      <div class="calib-row">
+        <button class="calib-btn" id="setFront">Avant green</button>
+        <button class="calib-btn" id="setMid">Milieu green</button>
+        <button class="calib-btn" id="setBack">Fond green</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WIND ===== -->
+  <section class="view" id="view-wind">
+    <div class="wind-card">
+      <div class="compass" id="compass">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="46" fill="none" stroke="#cfc09a" stroke-width="1.5"/>
+          <text x="50" y="12" text-anchor="middle" font-size="9" fill="#8a8175">N</text>
+          <text x="90" y="53" text-anchor="middle" font-size="9" fill="#8a8175">E</text>
+          <text x="50" y="94" text-anchor="middle" font-size="9" fill="#8a8175">S</text>
+          <text x="10" y="53" text-anchor="middle" font-size="9" fill="#8a8175">O</text>
+          <g id="arrow" transform="rotate(0 50 50)">
+            <line x1="50" y1="50" x2="50" y2="18" stroke="#0a4f47" stroke-width="4" stroke-linecap="round"/>
+            <polygon points="50,10 44,24 56,24" fill="#0a4f47"/>
+          </g>
+          <circle cx="50" cy="50" r="4" fill="#0a4f47"/>
+        </svg>
+      </div>
+      <div class="wind-speed" id="windSpeed">--</div>
+      <div class="wind-unit">km/h</div>
+      <div class="wind-dir-label" id="windDirLabel">Chargement du vent…</div>
+      <div class="wind-updated" id="windUpdated"></div>
+      <button class="refresh-btn" id="refreshWind">Actualiser</button>
+    </div>
+  </section>
+
+  <!-- ===== SCORECARD ===== -->
+  <section class="view" id="view-score">
+    <table class="score">
+      <thead>
+        <tr><th>Trou</th><th>Par</th><th>Score</th></tr>
+      </thead>
+      <tbody id="scoreBody"></tbody>
+    </table>
+    <div class="score-summary">
+      <div><b id="sumTotal">0</b><span>total</span></div>
+      <div><b id="sumPar">0</b><span>par</span></div>
+      <div><b id="sumDiff">--</b><span>écart</span></div>
+    </div>
+    <button class="io-btn" id="resetScore" style="width:100%; margin-top:14px;">Nouvelle partie</button>
+  </section>
+
+  <div class="section-title">Sauvegarde</div>
+  <div class="io-row">
+    <button class="io-btn" id="exportBtn">Exporter les données</button>
+    <button class="io-btn" id="importBtn">Importer</button>
+  </div>
+  <textarea id="ioArea" rows="4" placeholder="Colle ici les données exportées pour les réimporter"></textarea>
+
+</main>
+
+<script>
+// ================= STATE =================
+let holes = Array.from({length:9}, (_,i) => ({ num: i+1, front:null, mid:null, back:null }));
+let scorecard = Array.from({length:9}, (_,i) => ({ num: i+1, par: null, score: null }));
+let currentHole = 0;
+let userPos = null;
+
+const COURSE_LAT = 48.601;
+const COURSE_LON = -2.162;
+
+// ================= TABS =================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'wind' && !windLoaded) loadWind();
+  };
+});
+
+// ================= DISTANCE (Haversine) =================
+function distanceMeters(lat1, lon1, lat2, lon2){
+  const R = 6371000;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+const holeStrip = document.getElementById('holeStrip');
+holes.forEach((h, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'hole-btn' + (i === currentHole ? ' active' : '');
+  btn.textContent = h.num;
+  btn.onclick = () => selectHole(i);
+  holeStrip.appendChild(btn);
+});
+
+function selectHole(i){
+  currentHole = i;
+  [...holeStrip.children].forEach((b, idx) => b.classList.toggle('active', idx === i));
+  document.getElementById('holeName').textContent = 'Trou ' + holes[i].num;
+  document.getElementById('calibHoleNum').textContent = holes[i].num;
+  updateDistances();
+}
+
+function fmt(v){ return (v === null || v === undefined || isNaN(v)) ? '--' : Math.round(v); }
+
+function updateDistances(){
+  const h = holes[currentHole];
+  if (!userPos){
+    ['distMain','distFront','distMid','distBack'].forEach(id => document.getElementById(id).textContent = '--');
+    return;
+  }
+  const dFront = h.front ? distanceMeters(userPos.lat, userPos.lon, h.front.lat, h.front.lon) : null;
+  const dMid   = h.mid   ? distanceMeters(userPos.lat, userPos.lon, h.mid.lat, h.mid.lon) : null;
+  const dBack  = h.back  ? distanceMeters(userPos.lat, userPos.lon, h.back.lat, h.back.lon) : null;
+  document.getElementById('distMain').textContent = fmt(dMid !== null ? dMid : (dFront !== null ? dFront : dBack));
+  document.getElementById('distFront').textContent = fmt(dFront);
+  document.getElementById('distMid').textContent = fmt(dMid);
+  document.getElementById('distBack').textContent = fmt(dBack);
+}
+
+const statusEl = document.getElementById('gpsStatus');
+if ('geolocation' in navigator){
+  navigator.geolocation.watchPosition(
+    pos => {
+      userPos = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      statusEl.textContent = 'Position GPS active (précision ≈ ' + Math.round(pos.coords.accuracy) + ' m)';
+      statusEl.classList.remove('err');
+      updateDistances();
+    },
+    err => {
+      statusEl.textContent = 'Position indisponible : ' + err.message;
+      statusEl.classList.add('err');
+    },
+    { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
+  );
+} else {
+  statusEl.textContent = "Géolocalisation indisponible sur cet appareil.";
+  statusEl.classList.add('err');
+}
+
+document.getElementById('toggleCalib').onclick = () => {
+  const p = document.getElementById('calibPanel');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+};
+function setTarget(key, btnEl){
+  if (!userPos){ alert("Position GPS pas encore disponible, patiente quelques secondes."); return; }
+  holes[currentHole][key] = { lat: userPos.lat, lon: userPos.lon };
+  document.querySelectorAll('.calib-btn').forEach(b => b.classList.remove('set'));
+  btnEl.classList.add('set');
+  updateDistances();
+}
+document.getElementById('setFront').onclick = e => setTarget('front', e.target);
+document.getElementById('setMid').onclick   = e => setTarget('mid', e.target);
+document.getElementById('setBack').onclick  = e => setTarget('back', e.target);
+
+// ================= WIND =================
+let windLoaded = false;
+function degToCompass(deg){
+  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
+  return dirs[Math.round(deg / 22.5) % 16];
+}
+async function loadWind(){
+  const label = document.getElementById('windDirLabel');
+  label.textContent = 'Chargement du vent…';
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${COURSE_LAT}&longitude=${COURSE_LON}&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m&wind_speed_unit=kmh`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const speed = data.current.wind_speed_10m;
+    const gust = data.current.wind_gusts_10m;
+    const dir = data.current.wind_direction_10m;
+    document.getElementById('windSpeed').textContent = Math.round(speed);
+    document.getElementById('arrow').setAttribute('transform', `rotate(${dir} 50 50)`);
+    label.textContent = `Vient du ${degToCompass(dir)} (${Math.round(dir)}°) · rafales ${Math.round(gust)} km/h`;
+    document.getElementById('windUpdated').textContent = 'Mis à jour à ' + new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    windLoaded = true;
+  } catch(e){
+    label.textContent = "Impossible de charger le vent (connexion internet nécessaire).";
+  }
+}
+document.getElementById('refreshWind').onclick = loadWind;
+
+// ================= SCORECARD =================
+const scoreBody = document.getElementById('scoreBody');
+function renderScorecard(){
+  scoreBody.innerHTML = '';
+  scorecard.forEach((h, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${h.num}</td>
+      <td><input type="number" min="3" max="6" data-i="${i}" class="parInput" value="${h.par ?? ''}"></td>
+      <td><input type="number" min="1" max="15" data-i="${i}" class="scoreInput" value="${h.score ?? ''}"></td>
+    `;
+    scoreBody.appendChild(tr);
+  });
+  document.querySelectorAll('.parInput').forEach(inp => inp.oninput = e => {
+    scorecard[e.target.dataset.i].par = e.target.value ? parseInt(e.target.value) : null;
+    updateScoreSummary();
+  });
+  document.querySelectorAll('.scoreInput').forEach(inp => inp.oninput = e => {
+    scorecard[e.target.dataset.i].score = e.target.value ? parseInt(e.target.value) : null;
+    updateScoreSummary();
+  });
+  updateScoreSummary();
+}
+function updateScoreSummary(){
+  let total = 0, par = 0, anyScore = false, anyPar = false;
+  scorecard.forEach(h => {
+    if (h.score){ total += h.score; anyScore = true; }
+    if (h.par){ par += h.par; anyPar = true; }
+  });
+  document.getElementById('sumTotal').textContent = total;
+  document.getElementById('sumPar').textContent = par;
+  if (anyScore && anyPar){
+    const diff = total - par;
+    document.getElementById('sumDiff').textContent = diff === 0 ? 'PAR' : (diff > 0 ? '+' + diff : diff);
+  } else {
+    document.getElementById('sumDiff').textContent = '--';
+  }
+}
+document.getElementById('resetScore').onclick = () => {
+  if (confirm('Effacer tous les scores de cette partie ?')){
+    scorecard.forEach(h => h.score = null);
+    renderScorecard();
+  }
+};
+renderScorecard();
+
+// ================= EXPORT / IMPORT =================
+const ioArea = document.getElementById('ioArea');
+document.getElementById('exportBtn').onclick = () => {
+  ioArea.style.display = 'block';
+  ioArea.value = JSON.stringify({ holes, scorecard }, null, 0);
+  ioArea.select();
+};
+document.getElementById('importBtn').onclick = () => {
+  if (ioArea.style.display === 'none'){
+    ioArea.style.display = 'block';
+    ioArea.value = '';
+    ioArea.focus();
+    return;
+  }
+  try {
+    const parsed = JSON.parse(ioArea.value);
+    if (parsed.holes && parsed.scorecard){
+      holes = parsed.holes;
+      scorecard = parsed.scorecard;
+      renderScorecard();
+      selectHole(0);
+      alert('Données importées.');
+    } else {
+      alert('Format inattendu.');
+    }
+  } catch(e){
+    alert('JSON invalide.');
+  }
+};
+
+selectHole(0);
+</script>
+
+</body>
+</html>
