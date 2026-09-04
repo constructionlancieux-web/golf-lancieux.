@@ -124,6 +124,7 @@
     border-radius: 3px; border: 1px solid var(--sea); background: white; color: var(--sea-deep); cursor:pointer;
   }
   .calib-btn.set{ background: var(--ok); border-color: var(--ok); color: white; }
+  .calib-btn .check{ display:block; font-size:11px; margin-top:2px; }
   .toggle-calib{
     display:block; text-align:center; margin: 16px auto 0; background:none; border:none;
     color: var(--accent); font-family: inherit; font-size: 13px; text-decoration: underline; cursor:pointer;
@@ -210,9 +211,9 @@
     <div class="calib" id="calibPanel" style="display:none;">
       <p>Tiens-toi à l'endroit voulu sur le trou <span id="calibHoleNum">1</span>, puis appuie sur le bouton correspondant pour enregistrer ta position GPS actuelle comme repère.</p>
       <div class="calib-row">
-        <button class="calib-btn" id="setFront">Avant green</button>
-        <button class="calib-btn" id="setMid">Milieu green</button>
-        <button class="calib-btn" id="setBack">Fond green</button>
+        <button class="calib-btn" id="setFront">Avant green<span class="check" id="checkFront"></span></button>
+        <button class="calib-btn" id="setMid">Milieu green<span class="check" id="checkMid"></span></button>
+        <button class="calib-btn" id="setBack">Fond green<span class="check" id="checkBack"></span></button>
       </div>
     </div>
   </section>
@@ -313,6 +314,17 @@ function selectHole(i){
   document.getElementById('holeName').textContent = 'Trou ' + holes[i].num;
   document.getElementById('calibHoleNum').textContent = holes[i].num;
   updateDistances();
+  refreshCalibButtons();
+}
+
+function refreshCalibButtons(){
+  const h = holes[currentHole];
+  const map = [['front','setFront','checkFront'],['mid','setMid','checkMid'],['back','setBack','checkBack']];
+  map.forEach(([key, btnId, checkId]) => {
+    const isSet = !!h[key];
+    document.getElementById(btnId).classList.toggle('set', isSet);
+    document.getElementById(checkId).textContent = isSet ? '✓ enregistré' : '';
+  });
 }
 
 function fmt(v){ return (v === null || v === undefined || isNaN(v)) ? '--' : Math.round(v); }
@@ -359,9 +371,8 @@ document.getElementById('toggleCalib').onclick = () => {
 function setTarget(key, btnEl){
   if (!userPos){ alert("Position GPS pas encore disponible, patiente quelques secondes."); return; }
   holes[currentHole][key] = { lat: userPos.lat, lon: userPos.lon };
-  document.querySelectorAll('.calib-btn').forEach(b => b.classList.remove('set'));
-  btnEl.classList.add('set');
   updateDistances();
+  refreshCalibButtons();
 }
 document.getElementById('setFront').onclick = e => setTarget('front', e.target);
 document.getElementById('setMid').onclick   = e => setTarget('mid', e.target);
