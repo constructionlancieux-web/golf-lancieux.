@@ -1,114 +1,74 @@
 <!doctype html>
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Golf de Lancieux · GPS, vent et score</title>
+<title>Golf de Lancieux · Distance et météo</title>
 <style>
-:root{--bg:#f4f6ef;--fg:#1b281d;--mut:#5f6e60;--card:#fff;--ac:#2f7d3a;--acf:#fff;--bd:#d5dacd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101611;--fg:#e8efe6;--mut:#9aa99b;--card:#1b241c;--ac:#6cc577;--acf:#0d160e;--bd:#2d392e;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#101611;--fg:#e8efe6;--mut:#9aa99b;--card:#1b241c;--ac:#6cc577;--acf:#0d160e;--bd:#2d392e;color-scheme:dark}
+:root{--bg:#f4f6ef;--fg:#1b281d;--mut:#5f6e60;--card:#fff;--ac:#2f7d3a;--bd:#d5dacd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101611;--fg:#e8efe6;--mut:#9aa99b;--card:#1b241c;--ac:#6cc577;--bd:#2d392e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101611;--fg:#e8efe6;--mut:#9aa99b;--card:#1b241c;--ac:#6cc577;--bd:#2d392e;color-scheme:dark}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
-#app{max-width:480px;margin:0 auto;padding:16px}
-h1{font-size:22px;margin:4px 0}h2{font-size:15px;margin:18px 0 8px;color:var(--mut);font-weight:600}
-.m{color:var(--mut);margin:0 0 12px;font-size:14px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin:10px 0}
-label{display:block;font-size:14px;color:var(--mut);margin:10px 0 4px}
-input{width:100%;box-sizing:border-box;font:inherit;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--fg)}
-.row{display:flex;gap:8px}.row>*{flex:1}
-button{font:inherit;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:12px;padding:11px;cursor:pointer}
-button.on{border-color:var(--ac);outline:2px solid var(--ac)}
-button.pri{background:var(--ac);color:var(--acf);border-color:var(--ac);font-weight:600;width:100%;margin-top:14px}
-button:disabled{opacity:.4}
-.dot{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid #0005;vertical-align:-2px;margin-right:6px}
-.big{display:flex;align-items:center;justify-content:center;gap:22px;margin:14px 0}
-.big button{width:64px;height:64px;font-size:30px;border-radius:50%}
-.big b{font-size:56px;min-width:70px;text-align:center}
-.info{display:flex;justify-content:space-between;text-align:center}.info div{flex:1}.info b{display:block;font-size:20px}.info span{font-size:12px;color:var(--mut)}
-.chips{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin:10px 0}
-.chips button{padding:6px 0;font-size:12px;line-height:1.2}
-.chips small{display:block;color:var(--mut);font-size:11px}
-.tot{display:flex;gap:8px}.tot div{flex:1;text-align:center;padding:10px;background:var(--card);border:1px solid var(--bd);border-radius:12px}.tot b{display:block;font-size:24px}.tot span{font-size:12px;color:var(--mut)}
-.h{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:14px}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif}
+#app{max-width:480px;margin:0 auto;padding:12px}
+.m{color:var(--mut);font-size:13px;margin:4px 0}
+button{font:inherit;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:12px;padding:10px;cursor:pointer}
+button.on{background:var(--ac);color:var(--bg);border-color:var(--ac);font-weight:700}
+.holes{display:grid;grid-template-columns:repeat(9,1fr);gap:4px}.holes button{padding:12px 0;font-size:17px}
+.stage{position:relative;overflow:hidden;display:flex;gap:8px;background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:12px;margin:10px 0}
+.wm{position:absolute;right:-8px;top:-34px;font-size:270px;font-weight:900;line-height:1;opacity:.07;pointer-events:none}
+.mainc{flex:1;text-align:center;position:relative;min-width:0}
+.side{width:86px;position:relative;font-size:14px}
+.side b.par{font-size:34px;line-height:1}
+.dbox{display:inline-block;border:4px solid #e11d2e;border-radius:14px;padding:2px 16px;font-size:58px;font-weight:800;line-height:1.15}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid #0006;margin-right:5px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px;text-align:center}
 </style></head><body><div id="app"></div>
 <script>
-const PAR=[4,3,5,4,3,4,4,4,5],SI=[3,5,9,1,15,17,7,11,13];
-const RK=SI.map(v=>[...SI].sort((a,b)=>a-b).indexOf(v));
-const T={Blanc:{c:'#ecece6',sl:130,ss:68.7,d:[309,127,454,298,97,264,321,326,470]},
-Jaune:{c:'#f2d21b',sl:125,ss:67.7,d:[283,112,425,281,97,258,275,326,445]},
-Bleu:{c:'#1e9be0',sl:130,ss:70.8,d:[277,112,385,274,87,240,275,294,445]},
-Rouge:{c:'#d62c2c',sl:126,ss:69.7,d:[243,101,348,242,87,235,226,294,399]}};
-let D={cur:null,hist:[]},ui={mode:'index',tee:'Jaune',h:0,screen:'setup',v:'',d:new Date().toISOString().slice(0,10)};
-try{D=JSON.parse(localStorage.getItem('golfL'))||D}catch(e){}
-D.gr=D.gr||{};
-const G0=[[48.601016,-2.157887],[48.600568,-2.15844],[48.603115,-2.15783],[48.601474,-2.160012],[48.601804,-2.160423],[48.600956,-2.164063],[48.603762,-2.165395],[48.601136,-2.164868],[48.603768,-2.160696]],O0={2:[48.602541,-2.158070],3:[48.601912,-2.159548]};
-const gp=h=>D.gr[h]||{lat:G0[h][0],lon:G0[h][1]};
-const sv=()=>{try{localStorage.setItem('golfL',JSON.stringify(D))}catch(e){}};
+const PAR=[4,3,5,4,3,4,4,4,5];
+const TE=[['Blanc','#ecece6',[309,127,454,298,97,264,321,326,470]],['Jaune','#f2d21b',[283,112,425,281,97,258,275,326,445]],['Bleu','#1e9be0',[277,112,385,274,87,240,275,294,445]],['Rouge','#d62c2c',[243,101,348,242,87,235,226,294,399]]];
+const G0=[[48.601016,-2.157887],[48.600568,-2.15844],[48.603115,-2.15783],[48.601474,-2.160012],[48.601804,-2.160423],[48.600956,-2.164063],[48.603762,-2.165395],[48.601136,-2.164868],[48.603768,-2.160696]],O0={2:[48.602541,-2.15807],3:[48.601912,-2.159548]};
+let D={gr:{}},h=0;
+try{D.gr=(JSON.parse(localStorage.getItem('golfL'))||{}).gr||{};h=Math.min(8,Math.max(0,+localStorage.getItem('golfH')||0))}catch(e){}
+const sv=()=>{try{localStorage.setItem('golfL',JSON.stringify({gr:D.gr}));localStorage.setItem('golfH',h)}catch(e){}};
+const gp=i=>D.gr[i]||{lat:G0[i][0],lon:G0[i][1]};
 const $=id=>document.getElementById(id);
-const fd=s=>{try{return new Date(s+'T12:00:00').toLocaleDateString('fr-FR')}catch(e){return s}};
-const rec=(g,h)=>{const n=Math.max(0,g.hj);return Math.floor(n/9)+(RK[h]<n%9?1:0)};
-const eff=(g,h)=>g.sc[h]<0?PAR[h]+2+rec(g,h):g.sc[h];
-const pts=(g,h)=>g.sc[h]==null||g.sc[h]<0?0:Math.max(0,2+PAR[h]-g.sc[h]+rec(g,h));
-const S=(g,f)=>PAR.reduce((a,_,h)=>a+f(g,h),0);
-function stats(g){const t=T[g.tee],brut=S(g,eff),p=S(g,pts);
-const agb=S(g,(g,h)=>Math.min(eff(g,h),PAR[h]+2+rec(g,h)));
-const idx=Math.round(2*113/t.sl*(agb-t.ss/2)*10)/10;
-return{brut,net:brut-g.hj,p,idx}}
-function cap(){if($('v'))ui.v=$('v').value;if($('d'))ui.d=$('d').value}
-function sm(m){cap();ui.mode=m;R()}
-function st(t){cap();ui.tee=t;R()}
-function start(){cap();const v=parseFloat(String(ui.v).replace(',','.'));
-if(isNaN(v)){alert('Indique ton '+(ui.mode=='index'?'index':'niveau')+'.');return}
-const t=T[ui.tee],hj=ui.mode=='index'?Math.round(v*t.sl/113/2+(t.ss-72)/2):Math.round(v);
-D.cur={date:ui.d,mode:ui.mode,v,tee:ui.tee,hj:Math.max(0,hj),sc:Array(9).fill(null)};sv();ui.h=0;ui.screen='play';R()}
-function adj(n){const g=D.cur;let s=g.sc[ui.h];s=(s==null||s<0)?PAR[ui.h]:Math.max(1,s+n);g.sc[ui.h]=s;sv();R()}
-function pk(){D.cur.sc[ui.h]=-1;sv();R()}
-function go(h){ui.h=Math.max(0,Math.min(8,h));R()}
-function fin(){const g=D.cur,s=stats(g);D.hist.unshift({date:g.date,tee:g.tee,hj:g.hj,brut:s.brut,net:s.net,p:s.p,idx:s.idx});
-D.hist=D.hist.slice(0,15);ui.last=D.hist[0];D.cur=null;sv();ui.screen='res';R()}
-function resume(){ui.screen='play';R()}
-function nw(){ui.screen='setup';ui.v='';ui.d=new Date().toISOString().slice(0,10);R()}
-function R(){const a=$('app');
-if(ui.screen=='play'&&D.cur){const g=D.cur,h=ui.h,t=T[g.tee],s=g.sc[h],st=stats(g),done=g.sc.every(x=>x!=null);
-a.innerHTML=`<p class="m">${fd(g.date)} · Départ ${g.tee} · ${g.hj} coup${g.hj>1?'s':''} reçu${g.hj>1?'s':''}</p>
-<div class="card"><div class="info"><div><b id="dist">…</b><span>Distance green</span></div><div><b id="wspd">…</b><span id="wlab">Vent</span></div><div><b id="warr" style="font-size:38px;line-height:1;transition:transform .4s">↑</b></div></div><p class="m" id="gmsg" style="text-align:center;margin:8px 0 0"></p><p id="obs" style="text-align:center;margin:4px 0 0;font-weight:600"></p><button style="width:100%;margin-top:8px" onclick="mark()">${D.gr[h]?'Green corrigé par moi · le refaire ici':'Corriger ce green depuis ma position'}</button></div>
-<div class="card"><div class="info"><div><b>Trou ${h+1}</b><span>sur 9</span></div><div><b>${PAR[h]}</b><span>Par</span></div><div><b>${t.d[h]} m</b><span>Distance</span></div><div><b>${rec(g,h)}</b><span>Coup${rec(g,h)>1?'s':''} reçu${rec(g,h)>1?'s':''}</span></div></div>
-<div class="big"><button onclick="adj(-1)">−</button><b>${s==null?'—':s<0?'X':s}</b><button onclick="adj(1)">+</button></div>
-<div class="row"><button onclick="pk()">Ramassé</button><button onclick="go(${h-1})" ${h==0?'disabled':''}>◀ Précédent</button><button onclick="go(${h+1})" ${h==8?'disabled':''}>Suivant ▶</button></div></div>
-<div class="chips">${PAR.map((_,i)=>`<button class="${i==h?'on':''}" onclick="go(${i})">${i+1}<small>${g.sc[i]==null?'·':g.sc[i]<0?'X':g.sc[i]}</small></button>`).join('')}</div>
-<div class="tot"><div><b>${st.brut}</b><span>Brut</span></div><div><b>${st.net}</b><span>Net</span></div><div><b>${st.p}</b><span>Points</span></div></div>
-<button class="pri" onclick="fin()" ${done?'':'disabled'}>Terminer la partie</button>
-<p class="m" style="margin-top:8px">X = ramassé (0 point, compté au maximum dans le brut).</p>`;
-}else if(ui.screen=='res'&&ui.last){const r=ui.last;
-a.innerHTML=`<h1>Partie terminée</h1><p class="m">${fd(r.date)} · Départ ${r.tee}</p>
-<div class="tot"><div><b>${r.brut}</b><span>Brut</span></div><div><b>${r.net}</b><span>Net</span></div><div><b>${r.p}</b><span>Points Stableford</span></div></div>
-<div class="card"><b>Niveau joué : index ${String(r.idx).replace('.',',')}</b><p class="m" style="margin:6px 0 0">Estimation sur 9 trous, à partir du brut ajusté (double bogey net maximum par trou). 18 points correspondent au niveau attendu avec ${r.hj} coup${r.hj>1?'s':''} reçu${r.hj>1?'s':''}.</p></div>
-<button class="pri" onclick="nw()">Nouvelle partie</button>`;
-}else{ui.screen='setup';
-a.innerHTML=`<h1>Golf de Lancieux</h1><p class="m">Nouvelle partie · 9 trous · par 36</p>
-<label for="d">Date</label><input id="d" type="date" value="${ui.d}">
-<label>Style</label><div class="row"><button class="${ui.mode=='index'?'on':''}" onclick="sm('index')">Index</button><button class="${ui.mode=='niveau'?'on':''}" onclick="sm('niveau')">Niveau</button></div>
-<label for="v">${ui.mode=='index'?'Ton index (ex. 18,4)':'Ton niveau : coups reçus sur les 9 trous'}</label><input id="v" inputmode="decimal" value="${ui.v}">
-<label>Parcours</label><div class="row"><button class="on">9 trous Lancieux</button></div>
-<label>Couleur de départ</label><div class="row" style="flex-wrap:wrap">${Object.keys(T).map(k=>`<button style="flex:1 1 40%" class="${ui.tee==k?'on':''}" onclick="st('${k}')"><span class="dot" style="background:${T[k].c}"></span>${k}</button>`).join('')}</div>
-<button class="pri" onclick="start()">Commencer la partie</button>
-${D.cur?`<button class="pri" style="background:var(--card);color:var(--fg);border-color:var(--bd)" onclick="resume()">Reprendre la partie en cours</button>`:''}
-${D.hist.length?`<h2>Dernières parties</h2><div class="card">${D.hist.map(r=>`<div class="h"><span>${fd(r.date)} · ${r.tee}</span><span>${r.p} pts · index ${String(r.idx).replace('.',',')}</span></div>`).join('')}</div>`:''}`}}
 const rad=x=>x*Math.PI/180;
-function hav(a,b){const dp=rad(b.lat-a.lat),dl=rad(b.lon-a.lon),x=Math.sin(dp/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dl/2)**2;return 12742000*Math.asin(Math.sqrt(x))}
-function brg(a,b){const y=Math.sin(rad(b.lon-a.lon))*Math.cos(rad(b.lat)),x=Math.cos(rad(a.lat))*Math.sin(rad(b.lat))-Math.sin(rad(a.lat))*Math.cos(rad(b.lat))*Math.cos(rad(b.lon-a.lon));return(Math.atan2(y,x)*180/Math.PI+360)%360}
+const hav=(a,b)=>{const dp=rad(b.lat-a.lat),dl=rad(b.lon-a.lon),x=Math.sin(dp/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dl/2)**2;return 12742000*Math.asin(Math.sqrt(x))};
+const brg=(a,b)=>{const y=Math.sin(rad(b.lon-a.lon))*Math.cos(rad(b.lat)),x=Math.cos(rad(a.lat))*Math.sin(rad(b.lat))-Math.sin(rad(a.lat))*Math.cos(rad(b.lat))*Math.cos(rad(b.lon-a.lon));return(Math.atan2(y,x)*180/Math.PI+360)%360};
 let pos=null,W=null,gerr='';
+function go(i){h=i;sv();R()}
+function mark(){if(!pos){alert(gerr||'Position GPS pas encore reçue.');return}D.gr[h]={lat:pos.lat,lon:pos.lon};sv();R()}
 function gps(){if(!navigator.geolocation){gerr='GPS non disponible';return}
 navigator.geolocation.watchPosition(p=>{pos={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy};gerr='';upd()},e=>{pos=null;gerr=e.code==1?'Autorise la localisation dans le navigateur':'Position GPS indisponible';upd()},{enableHighAccuracy:true,maximumAge:2000})}
-async function wind(){try{const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.602&longitude=-2.161&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m&wind_speed_unit=kmh');const j=(await r.json()).current;W={s:j.wind_speed_10m,g:j.wind_gusts_10m,d:j.wind_direction_10m}}catch(e){}upd()}
-function mark(){if(!pos){alert(gerr||'Position GPS pas encore reçue.');return}D.gr[ui.h]={lat:pos.lat,lon:pos.lon};sv();R()}
-function upd(){if(!$('dist'))return;const g=gp(ui.h);let b=null,m='';
+async function wx(){try{const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.602&longitude=-2.161&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m&minutely_15=precipitation&forecast_minutely_15=16&wind_speed_unit=kmh&timezone=Europe%2FParis');const j=await r.json();
+W={s:j.current.wind_speed_10m,g:j.current.wind_gusts_10m,d:j.current.wind_direction_10m,t:j.minutely_15?j.minutely_15.time:null,p:j.minutely_15?j.minutely_15.precipitation:null}}catch(e){}upd()}
+const fm=m=>m<60?m+' min':Math.floor(m/60)+' h'+(m%60?' '+m%60:'');
+function rain(){if(!W)return'…';if(!W.t)return'Prévision de pluie indisponible';
+const now=Date.now(),T=W.t.map(s=>new Date(s).getTime()),P=W.p,n=T.length;let i=0;while(i<n&&T[i]+9e5<=now)i++;
+if(i>=n)return'Prévision de pluie indisponible';
+const w=k=>P[k]>=0.1;let a=i;while(a<n&&!w(a))a++;
+if(a>=n)return'Pas de pluie prévue dans les '+fm(Math.round((T[n-1]+9e5-now)/6e4));
+let b=a,pk=0;while(b<n&&w(b)){pk=Math.max(pk,P[b]*4);b++}
+const st=Math.max(0,Math.round((T[a]-now)/6e4)),du=Math.round((T[b-1]+9e5-Math.max(now,T[a]))/6e4);
+const it=pk<2.5?'faible':pk<7.6?'modérée':'forte';
+return(st==0?'Pluie en cours':'Pluie dans '+fm(st))+'<br>'+(b>=n?'au moins ':'pendant ')+fm(du)+' · '+it}
+function upd(){if(!$('dist'))return;const g=gp(h);let b=null,m='';
 if(!pos){$('dist').textContent='…';m=gerr||'Recherche de la position…'}
 else{$('dist').textContent=Math.round(hav(pos,g))+' m';b=brg(pos,g);m=pos.acc>25?'Précision GPS : '+Math.round(pos.acc)+' m':''}
+$('gmsg').textContent=m;const o=O0[h];$('obs').textContent=o&&pos?'Fossé : '+Math.round(hav(pos,{lat:o[0],lon:o[1]}))+' m':'';
 if(W){$('wspd').textContent=Math.round(W.s)+' km/h';const to=(W.d+180)%360,rel=b==null?null:(to-b+360)%360;
 $('warr').style.transform='rotate('+Math.round(rel==null?to:rel)+'deg)';
-$('wlab').textContent=(rel==null?'Vent · nord en haut':rel<45||rel>315?'Vent dans le dos':rel>135&&rel<225?'Vent de face':'Vent de travers')+' · rafales '+Math.round(W.g)}
-else{$('wspd').textContent='…';$('wlab').textContent='Vent'}
-$('gmsg').textContent=m;const o=O0[ui.h];$('obs').textContent=o&&pos?'Fossé : '+Math.round(hav(pos,{lat:o[0],lon:o[1]}))+' m':''}
-const R0=R;R=function(){R0();upd()};
-gps();wind();setInterval(wind,600000);R();
+$('wlab').textContent=(rel==null?'Vent · nord en haut':rel<45||rel>315?'Dans le dos':rel>135&&rel<225?'De face':'De travers')+' · rafales '+Math.round(W.g)}
+$('rain').innerHTML=rain()}
+function R(){$('app').innerHTML=`<div class="holes">${PAR.map((_,i)=>`<button class="${i==h?'on':''}" onclick="go(${i})">${i+1}</button>`).join('')}</div>
+<div class="stage"><div class="wm">${h+1}</div>
+<div class="mainc"><svg viewBox="0 0 190 164" width="100%" style="max-width:250px"><path d="M30 80C20 40 70 15 110 20C160 22 185 55 170 90C160 118 120 128 90 122C55 118 38 105 30 80Z" fill="#3d9a47" stroke="#2c7a36" stroke-width="5"/><path d="M52 78C48 52 80 36 110 38C145 40 160 60 150 85C142 104 118 110 92 106C70 103 56 95 52 78Z" fill="#52b05a"/><circle cx="95" cy="122" r="8" fill="#e11d2e" stroke="#fff" stroke-width="3"/><line x1="95" y1="160" x2="95" y2="142" stroke="#e11d2e" stroke-width="5"/><polygon points="95,131 86,145 104,145" fill="#e11d2e"/></svg>
+<div><span class="dbox" id="dist">…</span></div><p class="m" id="gmsg"></p><p id="obs" style="font-weight:600;margin:2px 0"></p></div>
+<div class="side"><div class="m">Par</div><b class="par">${PAR[h]}</b><div class="m" style="margin-top:12px">Départ</div>${TE.map(t=>`<div><span class="dot" style="background:${t[1]}"></span>${t[2][h]} m</div>`).join('')}</div></div>
+<div class="g2"><div class="card"><b id="warr" style="font-size:46px;display:inline-block;line-height:1;transition:transform .4s">↑</b><div><b id="wspd" style="font-size:24px">…</b></div><div class="m" id="wlab">Vent</div></div>
+<div class="card"><div class="m">Pluie</div><div id="rain" style="font-size:15px;margin-top:6px">…</div></div></div>
+<button style="width:100%;margin-top:10px" onclick="mark()">${D.gr[h]?'Green corrigé par moi · le refaire ici':'Corriger ce green depuis ma position'}</button>`;upd()}
+function wl(){try{navigator.wakeLock&&navigator.wakeLock.request('screen')}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)wl()});
+wl();gps();wx();setInterval(wx,600000);R();
 </script></body></html>
