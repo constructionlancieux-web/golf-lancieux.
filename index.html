@@ -1,30 +1,42 @@
 <!doctype html>
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0a1f13">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-512.png">
 <title>Golf de Lancieux · Distance et météo</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f4f6ef;--fg:#1b281d;--mut:#5f6e60;--card:#fff;--ac:#2f7d3a;--bd:#d5dacd;--bl:#1f66d6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101611;--fg:#e8efe6;--mut:#9aa99b;--card:#1b241c;--ac:#6cc577;--bd:#2d392e;--bl:#6aa8ff;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#101611;--fg:#e8efe6;--mut:#9aa99b;--card:#1b241c;--ac:#6cc577;--bd:#2d392e;--bl:#6aa8ff;color-scheme:dark}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif}
-#app{max-width:480px;margin:0 auto;padding:12px}
-.m{color:var(--mut);font-size:13px;margin:4px 0}
-button{font:inherit;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:12px;padding:10px;cursor:pointer}
-button.on{background:var(--ac);color:var(--bg);border-color:var(--ac);font-weight:700}
-.holes{display:grid;grid-template-columns:repeat(9,1fr);gap:4px}.holes button{padding:12px 0;font-size:17px}
-.stage{position:relative;overflow:hidden;display:flex;gap:8px;background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:12px;margin:10px 0}
-.wm{position:absolute;right:-8px;top:-34px;font-size:270px;font-weight:900;line-height:1;color:var(--bl);opacity:.22;pointer-events:none}
-.mainc{flex:1;text-align:center;position:relative;min-width:0}
-.side{width:86px;position:relative;font-size:14px}
-.side b.par{font-size:34px;line-height:1}
-.dbox{display:inline-block;border:4px solid #e11d2e;border-radius:14px;padding:2px 16px;font-size:58px;font-weight:800;line-height:1.15}
-.dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid #0006;margin-right:5px}
-.g3{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:6px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px;text-align:center}
-.rainc{padding:8px;border:2px solid var(--bl);background:color-mix(in srgb,var(--bl) 10%,var(--card));color:var(--bl)}
-.sc{width:100%;border-collapse:collapse;font-size:15px;text-align:center}
-.sc td,.sc th{padding:4px 2px;border-bottom:1px solid var(--bd)}
+:root{--bg:#0a1f13;--card:#16341f;--sf2:#0f2819;--bd:#2c5a3d;--fg:#f4f1e6;--mut:#a9b9a3;--ac:#b6cc4a;--bl:#6fb1ff;box-sizing:border-box;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:linear-gradient(180deg,#0a1f13,#123222) fixed;color:var(--fg);font:15px/1.35 Inter,system-ui,-apple-system,sans-serif}
+#app{max-width:480px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px 96px;display:flex;flex-direction:column;gap:12px}
+.m{color:var(--mut);font-size:12px;margin:4px 0}
+button{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--sf2);color:var(--fg);border-radius:14px;padding:10px}
+.bp{background:var(--ac);color:#0a1f13;border:0;font-weight:700}.full{width:100%;margin-top:8px;padding:14px}
+.hd{display:flex;align-items:center;gap:12px}.ball{width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 8px 10px #0007)}
+.ti{font:700 24px/1.1 Fraunces,Georgia,serif}
+.chip{display:flex;align-items:center;gap:6px;background:#b6cc4a24;color:var(--ac);border-radius:99px;padding:6px 10px;font-size:12px;font-weight:600}.chip i{width:7px;height:7px;border-radius:50%;background:var(--ac)}
+.sel{display:grid;grid-template-columns:repeat(9,1fr);gap:5px}.sel button{height:44px;padding:0;border:0;background:#1b3d29;color:var(--mut);font-weight:600;position:relative}.sel button.on{background:var(--ac);color:#0a1f13;font-weight:700}.sel u{position:absolute;bottom:5px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:currentColor;opacity:.7}
+.hero{position:relative;height:min(440px,116vw);border-radius:28px;overflow:hidden;box-shadow:0 18px 40px #0007}
+.bgi{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.ovl{position:absolute;inset:0;background:linear-gradient(180deg,#06140c8c 0%,#06140c00 35%,#06140c00 55%,#06140cb3 100%)}
+.tl{position:absolute;left:18px;top:14px}.lb{font-size:12px;letter-spacing:.16em;font-weight:600}.big6{font:700 68px/.95 Fraunces,Georgia,serif}.pr{font-weight:600;font-size:14px;margin-top:4px}
+.tees{position:absolute;right:12px;top:14px;background:#0a1f1399;border-radius:16px;padding:8px;display:flex;flex-direction:column;gap:4px}.tees button{display:flex;align-items:center;gap:8px;border:0;background:none;padding:3px 6px;font-size:13px;color:#dfe8d6;border-radius:8px}.tees button.on{font-weight:700;color:var(--fg);outline:2px solid var(--bl)}.dot{width:10px;height:10px;border-radius:50%}
+.glass{position:absolute;left:12px;right:12px;bottom:12px;background:#081a109e;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid #ffffff24;border-radius:22px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.m2{font-size:12px;color:#c4d2bd}.dist{font:700 66px/1 Fraunces,Georgia,serif}.dist small{font-size:24px;margin-left:4px;color:var(--ac)}.gr{text-align:right;font-weight:600;line-height:1.6;font-size:14px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cd{background:var(--card);border-radius:24px;padding:14px}
+.cmp{position:relative;width:104px;height:104px;margin:0 auto}.cmp svg{position:absolute;inset:0;width:100%;height:100%;transition:transform .4s}
+.wv b{font:700 30px/1 Fraunces,Georgia,serif}.wv small{color:var(--mut);margin-left:3px;font-size:13px}
+.cnt{text-align:center;font:700 72px/1 Fraunces,Georgia,serif}.row2{display:flex;gap:8px}.row2 button{flex:1;height:48px;font-size:24px;padding:0;border-radius:16px}
+.wx{position:relative;height:200px;border-radius:26px;overflow:hidden;box-shadow:0 14px 30px #0006}.wx img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.ovw{position:absolute;inset:0;background:linear-gradient(180deg,#050f1e80,#050f1e00 40%,#050f1ec7)}
+.tag{position:absolute;left:14px;top:12px;display:flex;align-items:center;gap:7px;background:#6fb1ff38;border:1px solid #6fb1ff80;color:#cfe4ff;border-radius:99px;padding:5px 11px;font-size:12px;font-weight:600}.tag i{width:7px;height:7px;border-radius:50%;background:var(--bl)}
+.wt{position:absolute;left:16px;bottom:14px}#wt{font:700 26px/1.1 Fraunces,Georgia,serif}#ws{font-size:13px;color:#dbe9ff;margin-top:2px}
+.wb{position:absolute;right:16px;bottom:14px;display:flex;align-items:flex-end;gap:6px}
+details.cd summary{cursor:pointer}
+.g9{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;text-align:center}.g9 button{padding:6px 0;border-radius:12px;border:0;background:var(--sf2)}.g9 button.on{background:var(--ac);color:#0a1f13}
+.nv{position:fixed;left:0;right:0;bottom:0;background:#081a10eb;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--bd);display:grid;grid-template-columns:repeat(3,1fr);text-align:center;padding-bottom:env(safe-area-inset-bottom,0px)}.nv a{padding:18px 0;color:var(--mut);font-weight:600;text-decoration:none}.nv a:first-child{color:var(--ac)}
+select,input{font:inherit;background:var(--sf2);color:var(--fg);border:1px solid var(--bd);border-radius:10px;padding:6px}
 </style></head><body><div id="app"></div>
 <script>
 const PAR=[4,3,5,4,3,4,4,4,5];
@@ -48,8 +60,8 @@ function ct(i){tee=i;sv();R()}
 function mark(){if(!pos){alert(gerr||'Position GPS pas encore reçue.');return}D.gr[h]={lat:pos.lat,lon:pos.lon};sv();R()}
 function gps(){if(!navigator.geolocation){gerr='GPS non disponible';return}
 navigator.geolocation.watchPosition(p=>{pos={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy};gerr='';upd()},e=>{pos=null;gerr=e.code==1?'Autorise la localisation dans le navigateur':'Position GPS indisponible';upd()},{enableHighAccuracy:true,maximumAge:2000})}
-async function wx(){try{const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.602&longitude=-2.161&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m&minutely_15=precipitation&forecast_minutely_15=16&wind_speed_unit=kmh&timezone=Europe%2FParis');const j=await r.json();
-W={s:j.current.wind_speed_10m,g:j.current.wind_gusts_10m,d:j.current.wind_direction_10m,t:j.minutely_15?j.minutely_15.time:null,p:j.minutely_15?j.minutely_15.precipitation:null}}catch(e){}upd()}
+async function wx(){try{const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.602&longitude=-2.161&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover&minutely_15=precipitation&forecast_minutely_15=16&wind_speed_unit=kmh&timezone=Europe%2FParis');const j=await r.json();
+W={s:j.current.wind_speed_10m,g:j.current.wind_gusts_10m,c:j.current.cloud_cover,d:j.current.wind_direction_10m,t:j.minutely_15?j.minutely_15.time:null,p:j.minutely_15?j.minutely_15.precipitation:null}}catch(e){}upd()}
 const fm=m=>m<60?m+' min':Math.floor(m/60)+' h'+(m%60?' '+m%60:'');
 function rain(){if(!W)return'…';if(!W.t)return'Prévision de pluie indisponible';
 const now=Date.now(),T=W.t.map(s=>new Date(s).getTime()),P=W.p,n=T.length;let i=0;while(i<n&&T[i]+9e5<=now)i++;
@@ -89,13 +101,51 @@ return`<div style="display:flex;gap:10px;align-items:center">${cs(a.c,96)}<div s
 /* --- v4 : clicker de coups (score) --- */
 function ca(d){const v=Math.max(0,(SC[h]||0)+d);SC[h]=v||null;sv2();upd()}
 function nr(){if(confirm('Effacer les coups de cette partie ?')){SC=Array(9).fill(null);sv2();upd()}}
-function scHtml(){let t=0,p=0,pts=0;
-const rows=PAR.map((pr,i)=>{const s=SC[i];if(s){t+=s;p+=pr;pts+=Math.max(0,2+pr-s)}const d=s?s-pr:null;
-const col=d==null?'':d<0?'color:var(--bl);font-weight:700':d>0?'color:#e11d2e;font-weight:700':'';
-return`<tr${i==h?' style="font-weight:800;background:color-mix(in srgb,var(--ac) 14%,transparent)"':''}><td>${i+1}</td><td>${pr}</td><td>${s||'–'}</td><td style="${col}">${d==null?'':d>0?'+'+d:d==0?'=':d}</td></tr>`}).join('');
-const dt=t-p;
-return`<table class="sc"><tr class="m"><th>Trou</th><th>Par</th><th>Coups</th><th>±</th></tr>${rows}<tr style="font-weight:800"><td>Total</td><td>${p||''}</td><td>${t||''}</td><td>${t?(dt>0?'+'+dt:dt==0?'=':dt):''}</td></tr></table><div class="m">${t?'Stableford brut : '+pts+' pts':'Aucun coup saisi'}</div>`}
-
+const SI=[3,5,9,1,15,17,7,11,13];                       // index des trous (carte du club)
+const TEED=[[34.3,130],[33.8,125],[35.4,130],[34.8,126]];  // [SSS, slope] : blanc, jaune, bleu, rouge
+let IDX=lsg('golfIdx',null),TR=lsg('golfTR',TEED);
+if(!Array.isArray(TR)||TR.length!=4)TR=TEED;
+const num=v=>parseFloat(String(v).replace(',','.'));
+const f1=x=>x.toFixed(1).replace('.',',');
+function saveIdx(){const v=num($('idx').value);IDX=isNaN(v)?null:v;try{localStorage.setItem('golfIdx',JSON.stringify(IDX))}catch(e){}upd()}
+function setTR(){const c=num($('cr').value),sl=num($('sl').value);TR[tee]=[isNaN(c)?TEED[tee][0]:c,isNaN(sl)?TEED[tee][1]:sl];try{localStorage.setItem('golfTR',JSON.stringify(TR))}catch(e){}upd()}
+function ph(){if(IDX==null)return null;const t=TR[tee];return Math.round(IDX/2*t[1]/113+(t[0]-36))}   // handicap de jeu 9 trous
+function recv(i){const P=ph();if(P==null)return 0;const rk=SI.filter(x=>x<SI[i]).length+1;
+if(P>=0)return Math.floor(P/9)+(rk<=P%9?1:0);const q=-P;return-(Math.floor(q/9)+(rk>9-q%9?1:0))}
+const pB=i=>SC[i]?Math.max(0,2+PAR[i]-SC[i]):null,pN=i=>SC[i]?Math.max(0,2+PAR[i]+recv(i)-SC[i]):null;
+function calc(){let n=0,t=0,pb=0,pn=0,ags=0,pr=0;
+for(let i=0;i<9;i++){const x=SC[i];if(!x)continue;n++;t+=x;pr+=PAR[i];pb+=pB(i);pn+=pN(i);ags+=Math.min(x,PAR[i]+2+recv(i))}
+const c=TR[tee];let sd=null,ij=null;
+if(n==9){sd=(ags-c[0])*113/c[1];if(IDX!=null)ij=sd+IDX/2+113/c[1]}
+return{n,t,pr,pb,pn,ags,sd,ij}}
+const rtxt=i=>{if(IDX==null)return'';const r=recv(i);return' · '+(r>0?r+' coup'+(r>1?'s':'')+' reçu'+(r>1?'s':''):r<0?'rend '+(-r):'0 coup reçu')};
+function scHtml(){const c=calc();
+const cells=PAR.map((pr,i)=>{const x=SC[i],d=x?x-pr:0,col=!x?'var(--mut)':d<0?'var(--bl)':d>0?'#ff9a8f':'inherit';
+return`<button class="${i==h?'on':''}" onclick="go(${i})" aria-label="Trou ${i+1}"><div class="m" style="font-size:10px;margin:0;color:inherit">${i+1}</div><b style="font-size:17px;color:${i==h?'inherit':col}">${x||'–'}</b></button>`}).join('');
+const dt=c.t-c.pr;
+return`<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><span class="m" style="margin:0">Carte de score</span><b style="font-size:13px">${c.n?c.t+' coups · '+(dt==0?'= par':(dt>0?'+':'')+dt):'Aucun coup saisi'}</b></div><div class="g9">${cells}</div>`}
+function lvlHtml(){const c=calc();
+if(!c.n)return'<div class="m">Saisis tes coups pour voir les points et le niveau de la partie.</div>';
+const big='font:700 34px/1.1 Fraunces,Georgia,serif';
+const lv=c.ij!=null?`<b style="font-size:22px;color:var(--ac)">Index joué ≈ ${f1(c.ij)}</b>`:c.sd!=null?`<b style="font-size:20px;color:var(--ac)">Différentiel ${f1(c.sd)}</b><div class="m">Renseigne ton index pour estimer l'index joué</div>`:'<span class="m">Termine les 9 trous pour calculer l\'index joué</span>';
+return`<div style="display:flex;justify-content:space-between"><div><div class="m" style="margin:0">Stableford net</div><b style="${big}">${IDX==null?'–':c.pn}</b> pts</div><div style="text-align:right"><div class="m" style="margin:0">Stableford brut</div><b style="${big}">${c.pb}</b> pts</div></div>
+<div style="margin-top:10px;padding:10px 12px;border-radius:16px;background:var(--sf2);border:1px solid var(--bd)"><div class="m" style="margin:0">Niveau de la partie</div>${lv}<div class="m">${c.t-c.pr>0?'+':''}${c.t-c.pr} par rapport au par · ${c.n} trou${c.n>1?'x':''}</div></div>`}
+const MAIL='construction.lancieux@gmail.com';
+function fin(){const c=calc();
+if(!c.n){alert('Aucun score saisi pour le moment.');return}
+if(c.n<9&&!confirm('Seulement '+c.n+' trou(x) saisi(s). Envoyer quand même ?'))return;
+if(IDX==null&&!confirm('Index non renseigné : le Stableford net ne sera pas calculé. Envoyer quand même ?'))return;
+const dt=new Date().toLocaleDateString('fr-FR'),t=TR[tee],P=ph();
+const L=PAR.map((pr,i)=>{const x=SC[i];return'Trou '+(i+1)+' · par '+pr+' · SI '+SI[i]+(IDX!=null?' · reçus '+recv(i):'')+' · score '+(x||'-')+(x?' · brut '+pB(i)+' pt'+(IDX!=null?' · net '+pN(i)+' pt':''):'')}).join('\n');
+let body='Partie du '+dt+' - Golf de Lancieux (9 trous, départ '+TE[tee][0].toLowerCase()+')\n'
++(IDX!=null?'Index : '+f1(IDX)+' · handicap de jeu : '+P+'\n':'Index : non renseigné\n')+'SSS '+f1(t[0])+' · slope '+t[1]+'\n\n'+L
++'\n\nTotal : '+c.t+' coups ('+(c.t-c.pr>0?'+':'')+(c.t-c.pr)+' par rapport au par, '+c.n+' trou(x))'
++'\nStableford brut : '+c.pb+' pts'+(IDX!=null?'\nStableford net : '+c.pn+' pts':'')
++(c.ij!=null?'\nNiveau de la partie : index joué ≈ '+f1(c.ij)+' (différentiel 9 trous '+f1(c.sd)+')':c.sd!=null?'\nDifférentiel 9 trous : '+f1(c.sd):'\nNiveau de la partie : non calculé (9 trous nécessaires)');
+const sh=SH.filter(x=>Date.now()-x.t<864e5);
+if(sh.length)body+='\n\nCoups mesurés :\n'+sh.map(x=>'Trou '+(x.h+1)+' : '+x.d+' m ('+x.club+')').join('\n');
+const H2=lsg('golfHist',[]);H2.unshift({date:dt,t:c.t,p:c.pr,n:c.n,pb:c.pb,pn:c.pn});try{localStorage.setItem('golfHist',JSON.stringify(H2.slice(0,30)))}catch(e){}
+location.href='mailto:'+MAIL+'?subject='+encodeURIComponent('Score golf Lancieux '+dt+' · '+c.pb+' pts brut'+(IDX!=null?' / '+c.pn+' net':''))+'&body='+encodeURIComponent(body)}
 /* --- v4 : clicker de distance de coup --- */
 function sA(){if(!pos){alert(gerr||'Position GPS pas encore reçue.');return}
 ST={lat:pos.lat,lon:pos.lon,h:h,club:adv().c};sv2();upd()}
@@ -111,33 +161,53 @@ $('slast').innerHTML=l?`Dernier coup : <b>${l.d} m</b> avec <select onchange="sK
 const st=CN.map(n=>{const a=SH.filter(s=>s.club==n);return{n,k:a.length,m:a.length?Math.round(a.reduce((x,s)=>x+s.d,0)/a.length):0,mx:a.length?Math.max(...a.map(s=>s.d)):0}}).filter(x=>x.k);
 $('sstat').innerHTML=st.length?st.map(x=>`<div style="display:flex;justify-content:space-between"><span>${x.n}</span><span><b>${x.m} m</b> moy. · max ${x.mx} m · ${x.k} coup${x.k>1?'s':''}</span></div>`).join(''):'<div class="m">Pas encore de coup mesuré.</div>'}
 
-function upd(){if(!$('dist'))return;const g=gp(h);let b=null,m='';
-if(!pos){$('dist').textContent='…';m=gerr||'Recherche de la position…'}
-else{$('dist').textContent=Math.round(hav(pos,g))+' m';b=brg(pos,g);m=pos.acc>25?'Précision GPS : '+Math.round(pos.acc)+' m':''}
-$('gmsg').textContent=m;const o=O0[h];$('obs').textContent=o&&pos?'Fossé : '+Math.round(hav(pos,{lat:o[0],lon:o[1]}))+' m':'';
-if(W){$('wspd').textContent=Math.round(W.s)+' km/h';const to=(W.d+180)%360,rel=b==null?null:(to-b+360)%360;
+let WK='';
+function wkind(){if(!W)return'';const t=rain(),m=t.match(/^Pluie dans (\d+) min/);if(/^Pluie en cours/.test(t)||(m&&+m[1]<=15))return'pluie';return W.c>=60?'nuageux':'soleil'}
+function qb(){if(!W||!W.t)return[0,0,0,0];const now=Date.now();let i=0;while(i<W.t.length&&new Date(W.t[i]).getTime()+9e5<=now)i++;return[0,1,2,3].map(k=>(W.p[i+k]||0)*4)}
+const setH=(id,html)=>{const e=$(id);if(e&&e._h!==html){e.innerHTML=html;e._h=html}};
+function upd(){if(!$('dist'))return;const g=gp(h);
+$('dist').textContent=pos?Math.round(hav(pos,g)):TE[tee][2][h];
+$('dlab').textContent=pos?'Entrée du green':(gerr||'Au départ · GPS en attente');
+$('gps').textContent=pos?'GPS ±'+Math.round(pos.acc)+' m':'GPS…';
+const b=pos?brg(pos,g):null,o=O0[h];
+$('obs').textContent=o&&pos?'Fossé '+Math.round(hav(pos,{lat:o[0],lon:o[1]}))+' m':'';
+if(W){$('wspd').textContent=Math.round(W.s);const to=(W.d+180)%360,rel=b==null?null:(to-b+360)%360;
 $('warr').style.transform='rotate('+Math.round(rel==null?to:rel)+'deg)';
-$('wlab').textContent=(rel==null?'Vent · nord en haut':rel<45||rel>315?'Dans le dos':rel>135&&rel<225?'De face':'De travers')+' · raf. '+Math.round(W.g)}
-$('rain').innerHTML=rain();$('club').innerHTML=advHtml();
-$('scn').textContent=SC[h]||0;$('sco').innerHTML=scHtml();
+$('wlab').textContent=(rel==null?'Nord en haut':rel<45||rel>315?'Dans le dos':rel>135&&rel<225?'De face':'De travers')+' · rafales '+Math.round(W.g);
+const t=rain().split('<br>');$('wt').textContent=t[0];$('ws').textContent=t[1]||'';
+const k=wkind();if(k&&k!==WK){WK=k;$('wimg').src='meteo-'+k+'.gif'}
+setH('wbars',qb().map((v,i)=>`<div style="text-align:center"><div style="width:14px;height:${Math.round(Math.min(52,6+v*14))}px;background:${v>0?'#6fb1ff':'#6fb1ff66'};border-radius:4px;margin:0 auto"></div><div style="font-size:10px;color:#dbe9ff;margin-top:4px">${['Maint.','+15','+30','+45'][i]}</div></div>`).join(''))}
+setH('club',advHtml());
+$('scn').textContent=SC[h]||0;setH('sco',scHtml());setH('lvlr',lvlHtml());
+$('pr').textContent='Par '+PAR[h]+' · '+TE[tee][2][h]+' m'+rtxt(h);$('phv').textContent=ph()==null?'–':ph();
+$('hpts').textContent=SC[h]?'Brut '+pB(h)+' pt'+(pB(h)>1?'s':'')+(IDX!=null?' · Net '+pN(h)+' pt'+(pN(h)>1?'s':''):''):'';
 $('slive').textContent=ST?(pos?Math.round(hav(ST,pos))+' m':'…'):'—';
-$('shint').textContent=ST?('Marche jusqu\'à ta balle puis appuie sur ②'+(pos&&pos.acc>10?' · GPS ±'+Math.round(pos.acc)+' m':'')):'Appuie sur ① juste avant de frapper';}
-function R(){$('app').innerHTML=`<div class="holes">${PAR.map((_,i)=>`<button class="${i==h?'on':''}" onclick="go(${i})">${i+1}</button>`).join('')}</div>
-<div class="stage"><div class="wm">${h+1}</div>
-<div class="mainc"><svg viewBox="0 0 190 164" width="100%" style="max-width:250px"><path d="M30 80C20 40 70 15 110 20C160 22 185 55 170 90C160 118 120 128 90 122C55 118 38 105 30 80Z" fill="#3d9a47" stroke="#2c7a36" stroke-width="5"/><path d="M52 78C48 52 80 36 110 38C145 40 160 60 150 85C142 104 118 110 92 106C70 103 56 95 52 78Z" fill="#52b05a"/><circle cx="95" cy="122" r="8" fill="#e11d2e" stroke="#fff" stroke-width="3"/><line x1="95" y1="160" x2="95" y2="142" stroke="#e11d2e" stroke-width="5"/><polygon points="95,131 86,145 104,145" fill="#e11d2e"/></svg>
-<div><span class="dbox" id="dist">…</span></div><p class="m" id="gmsg"></p><p id="obs" style="font-weight:600;margin:2px 0"></p></div>
-<div class="side"><div class="m">Par</div><b class="par">${PAR[h]}</b><div class="m" style="margin-top:12px">Départ</div>${TE.map((t,i)=>`<div onclick="ct(${i})" style="cursor:pointer;padding:1px 4px;border-radius:8px;${i==tee?'font-weight:800;outline:2px solid var(--ac)':''}"><span class="dot" style="background:${t[1]}"></span>${t[2][h]} m</div>`).join('')}</div></div>
-<div class="g3"><div class="card" style="padding:8px"><b id="warr" style="font-size:40px;display:inline-block;line-height:1;transition:transform .4s">↑</b><div><b id="wspd" style="font-size:20px">…</b></div><div class="m" id="wlab" style="font-size:11px">Vent</div></div>
-<div class="card rainc"><div style="font-weight:700;font-size:13px">Pluie</div><div id="rain" style="font-size:12px;margin-top:4px;line-height:1.3">…</div></div>
-<div class="card" style="padding:8px"><div class="m" style="margin:0">Coups · trou ${h+1}</div><b id="scn" style="font-size:38px;line-height:1.1">0</b><div style="display:flex;gap:6px;margin-top:4px"><button style="flex:1;padding:8px 0;font-size:20px" onclick="ca(-1)">−</button><button class="on" style="flex:1;padding:8px 0;font-size:20px" onclick="ca(1)">+</button></div></div></div>
-<div class="card" id="club" style="margin-top:8px;text-align:left"></div>
-<div class="card" style="margin-top:8px;text-align:left"><div class="m" style="margin-top:0">Mesure de coup</div><div style="font-size:34px;font-weight:800;line-height:1.1"><span id="slive">—</span></div><div class="m" id="shint"></div>
-<div style="display:flex;gap:8px;margin:6px 0"><button style="flex:1;padding:14px 4px" onclick="sA()">① Départ du coup</button><button class="on" style="flex:1;padding:14px 4px" onclick="sB()">② Je suis à ma balle</button></div><div class="m" id="slast"></div></div>
-<details class="card" style="margin-top:8px;text-align:left"><summary>Distances mesurées par club</summary><div id="sstat" style="margin-top:8px;font-size:15px"></div><button style="width:100%;margin-top:8px" onclick="sApply()">Reporter les moyennes dans « Mes distances »</button></details>
-<details class="card" style="margin-top:8px;text-align:left"><summary>Carte de score</summary><div id="sco" style="margin-top:8px"></div><button style="width:100%;margin-top:8px" onclick="nr()">Nouvelle partie</button></details>
-<details class="card" style="margin-top:8px;text-align:left"><summary>Mes distances (m)</summary><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">${CN.map((n,i)=>`<label class="m">${n}<input id="c${i}" type="number" inputmode="numeric" value="${CM[i]}" style="width:100%;box-sizing:border-box;font:inherit;padding:8px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--fg)"></label>`).join('')}</div><button style="width:100%;margin-top:8px" onclick="saveC()">Enregistrer mes distances</button></details>
-<button style="width:100%;margin-top:10px" onclick="mark()">${D.gr[h]?'Green corrigé par moi · le refaire ici':'Corriger ce green depuis ma position'}</button>`;upd();rs()}
+$('shint').textContent=ST?('Marche jusqu\'à ta balle puis appuie sur ②'+(pos&&pos.acc>10?' · GPS ±'+Math.round(pos.acc)+' m':'')):'Appuie sur ① juste avant de frapper'}
+function R(){$('app').innerHTML=`<header class="hd" id="top"><img class="ball" src="ball.png" alt="Balle Gaea Lancieux"><div style="flex:1"><div class="ti">Golf de Lancieux</div><div class="m" style="margin:2px 0 0">9 trous · Par 36</div></div><div class="chip"><i></i><span id="gps">GPS…</span></div></header>
+<div class="sel">${PAR.map((_,i)=>`<button class="${i==h?'on':''}" aria-label="Trou ${i+1}" onclick="go(${i})">${i+1}${SC[i]?'<u></u>':''}</button>`).join('')}</div>
+<section class="hero"><img class="bgi" src="greens/g${h+1}.jpg" alt="Green du trou ${h+1} vu du dessus"><div class="ovl"></div>
+<div class="tl"><div class="lb">TROU</div><div class="big6">${h+1}</div><div class="pr" id="pr"></div></div>
+<div class="tees">${TE.map((t,i)=>`<button class="${i==tee?'on':''}" onclick="ct(${i})"><span class="dot" style="background:${t[1]}"></span>${t[2][h]} m</button>`).join('')}</div>
+<div class="glass"><div><div class="m2" id="dlab">…</div><div class="dist"><span id="dist">…</span><small>m</small></div></div><div class="gr"><div id="obs"></div><div class="m2">Départ ${TE[tee][0].toLowerCase()}</div></div></div></section>
+<div class="g2"><div class="cd" style="text-align:center"><div class="m" style="text-align:left">Vent</div>
+<div class="cmp"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="#0f2819" stroke="#2c5a3d" stroke-width="2"/><g fill="#a9b9a3" font-size="10" font-family="Inter,sans-serif" text-anchor="middle"><text x="60" y="15">GREEN</text><text x="60" y="113">DOS</text></g></svg><svg id="warr" viewBox="0 0 120 120"><path d="M60 22L73 62H65V96H55V62H47Z" fill="#b6cc4a"/></svg></div>
+<div class="wv"><b id="wspd">…</b><small>km/h</small></div><div class="m" id="wlab" style="margin-top:4px;font-size:11px"></div></div>
+<div class="cd" style="display:flex;flex-direction:column;justify-content:space-between"><div class="m" style="margin:0">Coups · trou ${h+1}</div><div class="cnt" id="scn">0</div><div class="m" id="hpts" style="text-align:center;margin:0;min-height:16px"></div><div class="row2"><button aria-label="Retirer un coup" onclick="ca(-1)">−</button><button class="bp" aria-label="Ajouter un coup" onclick="ca(1)">+</button></div></div></div>
+<section class="wx"><img id="wimg" alt="Météo des prochaines minutes" src="${WK?'meteo-'+WK+'.gif':'meteo-soleil.gif'}"><div class="ovw"></div><div class="tag"><i></i>Prochain quart d'heure</div><div class="wt"><div id="wt">…</div><div id="ws"></div></div><div class="wb" id="wbars"></div></section>
+<div class="cd" id="club"></div>
+<div class="cd"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="m" style="margin:0">Mesure de coup</span></div><div style="font:700 44px/1.1 Fraunces,Georgia,serif;margin:4px 0 2px"><span id="slive">—</span></div><div class="m" id="shint" style="margin-bottom:10px"></div>
+<div style="display:flex;gap:10px"><button style="flex:1;height:54px;border-radius:18px;font-weight:600" onclick="sA()">① Départ du coup</button><button class="bp" style="flex:1;height:54px;border-radius:18px" onclick="sB()">② À ma balle</button></div><div class="m" id="slast" style="margin-top:10px"></div></div>
+<details class="cd"><summary>Distances mesurées par club</summary><div id="sstat" style="margin-top:8px;font-size:15px"></div><button class="full" onclick="sApply()">Reporter les moyennes dans « Mes distances »</button></details>
+<div class="cd" id="scc"><div id="sco"></div><button class="bp full" onclick="fin()">✔ Terminé · envoyer la carte par mail</button><button class="full" onclick="nr()">Nouvelle partie</button></div>
+<div class="cd" id="idxc"><div class="m" style="margin:0 0 8px">Index et niveau</div>
+<div class="g2"><label class="m">Index actuel<input id="idx" type="text" inputmode="decimal" placeholder="ex. 18,4" value="${IDX==null?'':String(IDX).replace('.',',')}" oninput="saveIdx()" style="width:100%;font-size:20px;font-weight:600"></label><div class="m">Handicap de jeu (9 trous)<div id="phv" style="font:700 30px/1.2 Fraunces,Georgia,serif;color:var(--fg)">–</div></div></div>
+<div class="g2" style="margin-top:8px"><label class="m">SSS départ ${TE[tee][0].toLowerCase()}<input id="cr" type="text" inputmode="decimal" value="${String(TR[tee][0]).replace('.',',')}" oninput="setTR()" style="width:100%"></label><label class="m">Slope<input id="sl" type="text" inputmode="numeric" value="${TR[tee][1]}" oninput="setTR()" style="width:100%"></label></div>
+<div id="lvlr" style="margin-top:12px"></div></div>
+<details class="cd"><summary>Mes distances (m)</summary><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">${CN.map((n,i)=>`<label class="m">${n}<input id="c${i}" type="number" inputmode="numeric" value="${CM[i]}" style="width:100%"></label>`).join('')}</div><button class="full" onclick="saveC()">Enregistrer mes distances</button></details>
+<button class="full" onclick="mark()">${D.gr[h]?'Green corrigé par moi · le refaire ici':'Corriger ce green depuis ma position'}</button>
+<nav class="nv"><a href="#top">Parcours</a><a href="#scc">Carte</a><a href="#club">Clubs</a></nav>`;upd();rs()}
 function wl(){try{navigator.wakeLock&&navigator.wakeLock.request('screen')}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)wl()});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 wl();gps();wx();setInterval(wx,600000);R();
 </script></body></html>
