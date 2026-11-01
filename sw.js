@@ -1,5 +1,5 @@
-const C='golf-lancieux-v6';
-const F=["./", "./index.html", "./manifest.webmanifest", "./ball.png", "./icon-192.png", "./icon-512.png", "./greens/g1.jpg", "./greens/g2.jpg", "./greens/g3.jpg", "./greens/g4.jpg", "./greens/g5.jpg", "./greens/g6.jpg", "./greens/g7.jpg", "./greens/g8.jpg", "./greens/g9.jpg", "./meteo-pluie.gif", "./meteo-nuageux.gif", "./meteo-soleil.gif"];
+const C='golf-lancieux-v7';
+const F=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(F)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{
