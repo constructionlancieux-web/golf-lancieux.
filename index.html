@@ -287,6 +287,7 @@ function R(){$('app').innerHTML=`<header class="hd" id="top"><img class="ball" s
 <div class="cd" id="club"></div>
 <div class="cd"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="m" style="margin:0">Mesure de coup</span></div><div style="font:700 44px/1.1 Fraunces,Georgia,serif;margin:4px 0 2px"><span id="slive">—</span></div><div class="m" id="shint" style="margin-bottom:10px"></div>
 <div style="display:flex;gap:10px"><button style="flex:1;height:54px;border-radius:18px;font-weight:600" onclick="sA()">① Départ du coup</button><button class="bp" style="flex:1;height:54px;border-radius:18px" onclick="sB()">② À ma balle</button></div><div class="m" id="slast" style="margin-top:10px"></div></div>
+<div class="cd"><div class="m" style="margin:0">Traceur de balle</div><button class="bp full" onclick="openTracer()">🎥 Filmer le coup · trait rouge</button></div>
 <details class="cd"><summary>Distances mesurées par club</summary><div id="sstat" style="margin-top:8px;font-size:15px"></div><button class="full" onclick="sApply()">Reporter les moyennes dans « Mes distances »</button></details>
 <div class="cd" id="scc"><div id="sco"></div><button class="bp full" onclick="fin()">✔ Terminé · envoyer la carte par mail</button><button class="full" onclick="nr()">Nouvelle partie</button></div>
 <div class="cd" id="idxc"><div class="m" style="margin:0 0 8px">Index et niveau</div>
@@ -302,4 +303,499 @@ function wl(){try{navigator.wakeLock&&navigator.wakeLock.request('screen')}catch
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)wl()});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 wl();gps();wx();boot();setInterval(wx,600000);R();
-</script></body></html>
+</script>
+<!-- ===== Traceur de balle (v13) ===== -->
+<style>
+#trc{position:fixed;inset:0;z-index:9999;background:#000;color:#fff;font-family:system-ui,-apple-system,Roboto,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:none}
+#trc .trStage{position:absolute;inset:0;overflow:hidden;background:#000}
+#trc .trZoom{position:absolute;inset:0;transform-origin:50% 50%;transition:transform .35s ease}
+#trc video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+#trc canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#trc .trTop{position:absolute;top:0;left:0;right:0;padding:8px 62px 8px 12px;display:flex;gap:10px;align-items:center;background:linear-gradient(#000b,#0000);font-size:14px;z-index:5;pointer-events:none}
+#trc .trStatus{flex:1;font-weight:600;text-shadow:0 1px 3px #000}
+#trc .trFps{opacity:.75;font-size:12px;text-shadow:0 1px 3px #000}
+#trc .trBar{position:absolute;left:0;right:0;bottom:0;padding:8px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;background:linear-gradient(#0000,#000c);z-index:5}
+#trc button{border:0;border-radius:22px;padding:11px 15px;font-size:15px;font-weight:600;background:#ffffff26;color:#fff;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);margin:0;width:auto}
+#trc button:active{transform:scale(.96)}
+#trc button.trMain{background:#e02020}
+#trc button.trOk{background:#1f8a4c}
+#trc .trHide{display:none!important}
+#trc .trResult{position:absolute;top:40px;right:10px;background:#000000d0;border:1px solid #fff3;border-radius:14px;padding:10px 14px;z-index:6;text-align:center;min-width:220px;max-width:46vw}
+#trc .trBig{font-size:30px;font-weight:800;color:#ff4a4a;line-height:1.1}
+#trc .trSub{font-size:14px;margin-top:3px}
+#trc .trSmall{font-size:11px;opacity:.65;margin-top:4px}
+#trc .trWalk{font-size:14px;margin-top:6px;color:#8fe3b0;font-weight:600}
+#trc .trResult a{display:inline-block;margin-top:8px;color:#fff;background:#1a73e8;padding:8px 14px;border-radius:18px;text-decoration:none;font-weight:600;font-size:14px}
+#trc .trResult button{margin-top:8px;padding:8px 14px;font-size:14px}
+#trc .trPanel{position:absolute;inset:0;background:#0b1f14f5;z-index:10;overflow:auto;padding:16px 20px 90px;touch-action:pan-y}
+#trc .trPanel h2{font-size:20px;margin:6px 0 12px}
+#trc .trPanel h3{font-size:16px;margin:16px 0 6px;color:#8fe3b0}
+#trc .trPanel p,#trc .trPanel li{font-size:14px;line-height:1.5;opacity:.92}
+#trc .trPanel ul{padding-left:18px}
+#trc label{display:block;font-size:14px;margin:14px 0 4px;font-weight:600}
+#trc input{width:100%;padding:10px;border-radius:10px;border:1px solid #fff3;background:#ffffff14;color:#fff;font-size:16px;-webkit-user-select:text;user-select:text}
+#trc input[type=range]{padding:0;accent-color:#e02020}
+#trc .trHint{font-size:12px;opacity:.65;margin-top:3px}
+#trc .trCloseBtn{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:11}
+#trc .trToast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#000000e0;padding:14px 18px;border-radius:14px;font-size:16px;text-align:center;z-index:8;max-width:80vw;pointer-events:none;line-height:1.4}
+#trc .trStart{position:absolute;inset:0;z-index:20;background:#0b1f14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;overflow:auto}
+#trc .trStart h1{font-size:24px;margin:0}
+#trc .trStart p{font-size:14px;opacity:.85;max-width:520px;line-height:1.5;margin:0}
+#trc .trX{position:absolute;top:10px;right:10px;z-index:30;width:42px;height:42px;padding:0;border-radius:50%;font-size:18px}
+</style>
+<div id="trc" class="trHide">
+  <div class="trStage" id="trStage">
+    <div class="trZoom" id="trZoom">
+      <video id="trLive" playsinline muted autoplay></video>
+      <video id="trReplay" class="trHide" playsinline muted loop></video>
+      <canvas id="trOv"></canvas>
+    </div>
+  </div>
+  <div class="trTop"><div class="trStatus" id="trStatus">Traceur</div><div class="trFps" id="trFps"></div></div>
+  <div class="trResult trHide" id="trResult"></div>
+  <div class="trToast trHide" id="trToast"></div>
+  <div class="trBar" id="trBar"></div>
+  <button class="trX" id="trX" aria-label="Fermer le traceur">✕</button>
+
+  <div class="trStart" id="trStart">
+    <h1>🎥 Traceur de balle <span style="color:#ff4a4a">●</span></h1>
+    <p id="trHole"></p>
+    <p>Pose le téléphone <b>à l'horizontale</b>, environ <b>3 m derrière la balle</b>, dans l'axe balle → entrée du green, à environ <b>1 m de haut</b> (sur le sac ou un petit trépied). Zoom ×1, téléphone immobile.</p>
+    <button class="trMain" id="trGo">Démarrer la caméra</button>
+    <button id="trHelpStart">Comment ça marche ?</button>
+  </div>
+
+  <div class="trPanel trHide" id="trSettings">
+    <h2>⚙️ Réglages du traceur</h2>
+    <p id="trAutoInfo"></p>
+    <label>Distance téléphone → balle (m)</label>
+    <input id="trR0" type="number" inputmode="decimal" step="0.5" min="1">
+    <div class="trHint">Mesure-la en pas : 3 m ≈ 4 grands pas.</div>
+    <label>Sensibilité de détection : <span id="trSensV"></span></label>
+    <input id="trSens" type="range" min="8" max="45" step="1">
+    <div class="trHint">À gauche = plus sensible (balle lointaine, mais plus de faux points). À droite = moins de parasites (vent dans les arbres).</div>
+    <label>Angle de vue caméra (°)</label>
+    <input id="trFov" type="number" inputmode="numeric" step="1" min="30" max="110">
+    <div class="trHint">66° conseillé pour le Pixel 9a en vidéo ×1. Sert au calcul gauche / droite.</div>
+    <button class="trOk trCloseBtn" data-trclose="trSettings">Enregistrer</button>
+  </div>
+
+  <div class="trPanel trHide" id="trHelp">
+    <h2>📱 Mode d'emploi</h2>
+    <h3>1. Placer le téléphone</h3>
+    <ul>
+      <li><b>Derrière la balle</b>, sur la ligne balle → entrée du green, à <b>3 m environ</b>.</li>
+      <li>À environ <b>1 m de haut</b> : posé sur le sac, calé sur un trépied ou un pique de parapluie.</li>
+      <li><b>À l'horizontale</b> (mode paysage), zoom ×1, <b>immobile</b> pendant le coup.</li>
+      <li>Cadrage : la balle dans le <b>quart bas</b> de l'image, l'entrée du green visible, beaucoup de ciel au-dessus.</li>
+      <li>Évite de filmer face au soleil. Un fond d'arbres foncés ou de ciel bleu aide beaucoup.</li>
+    </ul>
+    <h3>2. Poser les repères</h3>
+    <ul>
+      <li>Touche <b>Repères</b>, puis la <b>balle</b> à l'écran, puis l'<b>entrée du green</b>.</li>
+      <li>La distance au green est prise <b>automatiquement</b> dans l'appli (trou en cours, GPS).</li>
+    </ul>
+    <h3>3. Frapper</h3>
+    <ul>
+      <li>Touche <b>● Armer</b> et va frapper : le <span style="color:#ff4a4a">trait rouge</span> suit la balle en direct.</li>
+      <li>À la fin : distance estimée et côté (gauche / droite de la ligne du green).</li>
+    </ul>
+    <h3>4. Retrouver la balle</h3>
+    <ul>
+      <li><b>▶ Revoir</b> : rejoue le coup avec le trait, au ralenti si tu veux, et <b>🔍</b> zoome sur la zone de chute.</li>
+      <li>Trait arrêté trop tôt : <b>Corriger la chute</b> (touche l'endroit où elle est tombée) ou <b>Tracer à la main</b> (sommet puis chute).</li>
+      <li><b>🚶 Y aller</b> ouvre Google Maps à pied vers la zone de chute ; la page affiche à combien de mètres tu en es.</li>
+      <li><b>✔ Noter ce coup</b> l'ajoute à tes distances mesurées par club.</li>
+    </ul>
+    <h3>⚠️ Limites</h3>
+    <ul>
+      <li>La <b>direction</b> est assez fiable. La <b>distance</b> est approximative (souvent ± 20 à 30 m), moins juste si le terrain monte ou descend.</li>
+      <li>Une balle très lointaine ou sur ciel blanc peut être perdue en vol.</li>
+    </ul>
+    <button class="trOk trCloseBtn" data-trclose="trHelp">Compris</button>
+  </div>
+</div>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const root=$('trc'), live=$('trLive'), rep=$('trReplay'), ov=$('trOv'), octx=ov.getContext('2d');
+const wrap=$('trZoom'), bar=$('trBar'), statusEl=$('trStatus'), resEl=$('trResult'), toastEl=$('trToast');
+const AP=()=>({pos:(typeof pos!=='undefined')?pos:null,h:(typeof h!=='undefined')?h:0});
+
+/* ---------- Réglages ---------- */
+const S={r0:3,fov:66,sens:20};
+try{Object.assign(S,JSON.parse(localStorage.getItem('golfTracer')||'{}'))}catch(e){}
+function save(){try{localStorage.setItem('golfTracer',JSON.stringify(S))}catch(e){}}
+
+/* ---------- État ---------- */
+let stream=null, vw=1280, vh=720, gen=0, opened=false, drawing=false;
+let mode='idle';
+let ball=null, greenPt=null, land=null, trail=[], manualPts=[], manualDrawn=false;
+let heading=null, teePos=null, teeHeading=null, teeHole=0;
+let recorder=null, chunks=[], recStart=0, flightStart=0, replayUrl=null;
+let showing='live', zoom=1, slow=false, lastRes=null, noted=false, fpsCount=0, fpsTimer=null;
+
+/* ---------- Utilitaires ---------- */
+let toastTimer=null;
+function toast(msg,ms=2600){toastEl.innerHTML=msg;toastEl.classList.remove('trHide');clearTimeout(toastTimer);if(ms)toastTimer=setTimeout(()=>toastEl.classList.add('trHide'),ms);}
+function hideToast(){toastEl.classList.add('trHide');}
+function setStatus(t){statusEl.textContent=t;}
+const R_=Math.PI/180;
+function dist2(a,b){const dLa=(b.lat-a.lat)*R_,dLo=(b.lon-a.lon)*R_;const s=Math.sin(dLa/2)**2+Math.cos(a.lat*R_)*Math.cos(b.lat*R_)*Math.sin(dLo/2)**2;return 2*6371000*Math.asin(Math.sqrt(s));}
+function bear(a,b){const y=Math.sin((b.lon-a.lon)*R_)*Math.cos(b.lat*R_);const x=Math.cos(a.lat*R_)*Math.sin(b.lat*R_)-Math.sin(a.lat*R_)*Math.cos(b.lat*R_)*Math.cos((b.lon-a.lon)*R_);return (Math.atan2(y,x)/R_+360)%360;}
+function dest(p,b,d){const dr=d/6371000,br=b*R_,la=p.lat*R_,lo=p.lon*R_;const la2=Math.asin(Math.sin(la)*Math.cos(dr)+Math.cos(la)*Math.sin(dr)*Math.cos(br));const lo2=lo+Math.atan2(Math.sin(br)*Math.sin(dr)*Math.cos(la),Math.cos(dr)-Math.sin(la)*Math.sin(la2));return{lat:la2/R_,lon:lo2/R_};}
+function greenOf(i){try{return gp(i);}catch(e){return null;}}
+function teeDist(i){try{return TE[tee][2][i];}catch(e){return null;}}
+
+/* ---------- Boussole ---------- */
+window.addEventListener('deviceorientationabsolute',e=>{
+  if(!opened||e.alpha==null||e.beta==null||e.gamma==null)return;
+  const a=e.alpha*R_,b=e.beta*R_,g=e.gamma*R_;
+  const ca=Math.cos(a),sa=Math.sin(a),cb=Math.cos(b),sb=Math.sin(b),cg=Math.cos(g),sg=Math.sin(g);
+  const E=-(ca*sg+sa*sb*cg), N=-(sa*sg-ca*sb*cg);
+  if(Math.hypot(E,N)>0.2) heading=(Math.atan2(E,N)/R_+360)%360;
+});
+
+/* ---------- Caméra ---------- */
+async function startCamera(){
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:60}}});
+  }catch(e){toast('Impossible d\'ouvrir la caméra.<br>Autorise la caméra pour l\'appli golf dans Chrome.',0);return false;}
+  live.srcObject=stream;
+  await live.play().catch(()=>{});
+  await new Promise(r=>{if(live.videoWidth)r();else live.onloadedmetadata=()=>r();});
+  vw=live.videoWidth; vh=live.videoHeight; initProc();
+  gen++; procLoop(gen);
+  clearInterval(fpsTimer); fpsTimer=setInterval(()=>{$('trFps').textContent=fpsCount+' i/s · '+vw+'×'+vh;fpsCount=0;},1000);
+  return true;
+}
+function stopCamera(){
+  gen++; clearInterval(fpsTimer);
+  stopRec();
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  live.srcObject=null;
+}
+
+/* ---------- Traitement d'image ---------- */
+const PW=320; let PH=180, sc=4;
+const pc=document.createElement('canvas'); const pctx=pc.getContext('2d',{willReadFrequently:true});
+let bufs=[], bi=0, nFrames=0;
+function initProc(){PH=Math.round(PW*vh/vw); sc=vw/PW; pc.width=PW; pc.height=PH; bufs=[0,1,2].map(()=>new Uint8Array(PW*PH)); nFrames=0;}
+function grab(){
+  pctx.drawImage(live,0,0,PW,PH);
+  const d=pctx.getImageData(0,0,PW,PH).data;
+  bi=(bi+1)%3; const g=bufs[bi];
+  for(let i=0,j=0;i<g.length;i++,j+=4) g[i]=(d[j]+2*d[j+1]+d[j+2])>>2;
+  nFrames++;
+}
+function blobs(cx,cy,r){
+  const T=S.sens, c=bufs[bi], p=bufs[(bi+2)%3], q=bufs[(bi+1)%3];
+  const x0=Math.max(1,Math.floor(cx-r)), x1=Math.min(PW-2,Math.ceil(cx+r));
+  const y0=Math.max(1,Math.floor(cy-r)), y1=Math.min(PH-2,Math.ceil(cy+r));
+  if(x1<=x0||y1<=y0) return [];
+  const w=x1-x0+1,hh=y1-y0+1,m=new Uint8Array(w*hh);
+  for(let y=0;y<hh;y++){const row=(y+y0)*PW+x0;for(let x=0;x<w;x++){const i=row+x,a=c[i];if(Math.abs(a-p[i])>T&&Math.abs(a-q[i])>T)m[y*w+x]=1;}}
+  const out=[],st=[];
+  for(let k=0;k<m.length;k++){
+    if(m[k]!==1)continue;
+    let n=0,sx=0,sy=0;st.push(k);m[k]=2;
+    while(st.length){
+      const v=st.pop(),x=v%w,y=(v/w)|0;n++;sx+=x;sy+=y;
+      if(x>0&&m[v-1]===1){m[v-1]=2;st.push(v-1);}
+      if(x<w-1&&m[v+1]===1){m[v+1]=2;st.push(v+1);}
+      if(y>0&&m[v-w]===1){m[v-w]=2;st.push(v-w);}
+      if(y<hh-1&&m[v+w]===1){m[v+w]=2;st.push(v+w);}
+    }
+    out.push({x:sx/n+x0,y:sy/n+y0,n});
+  }
+  return out;
+}
+const MAXA=90;
+let cand=null, trk=null, vel=null, misses=0;
+function now(){return performance.now()-recStart;}
+function detectStart(){
+  const bx=ball.x/sc, by=ball.y/sc;
+  const bl=blobs(bx,by-32,36).filter(b=>b.n>=2&&b.n<=MAXA&&b.y<by-1.5);
+  if(cand){
+    let best=null,bd=1e9;
+    for(const b of bl){const d=Math.hypot(b.x-cand.x,b.y-cand.y);if(b.y<cand.y-0.8&&d>1&&d<28&&d<bd){bd=d;best=b;}}
+    if(best){startFlight(best);return;}
+    if(nFrames-cand.f>2)cand=null;
+  }
+  if(!cand&&bl.length){
+    let best=null,bd=1e9;
+    for(const b of bl){const d=Math.hypot(b.x-bx,b.y-by);if(d<bd){bd=d;best=b;}}
+    if(best&&bd<34)cand={x:best.x,y:best.y,f:nFrames,t:now()};
+  }
+}
+function startFlight(b){
+  mode='flight'; flightStart=performance.now(); misses=0;
+  trail=[{x:ball.x,y:ball.y,t:Math.max(0,cand.t-30)},{x:cand.x*sc,y:cand.y*sc,t:cand.t},{x:b.x*sc,y:b.y*sc,t:now()}];
+  vel={x:b.x-cand.x,y:b.y-cand.y}; trk={x:b.x,y:b.y}; cand=null;
+  setStatus('🔴 Balle suivie…'); renderBar();
+}
+function track(){
+  const k=misses+1, pred={x:trk.x+vel.x*k,y:trk.y+vel.y*k};
+  const sp=Math.hypot(vel.x,vel.y), r=7+sp*0.8+misses*3.5;
+  let best=null,bd=1e9;
+  for(const b of blobs(pred.x,pred.y,r)){if(b.n>MAXA)continue;const d=Math.hypot(b.x-pred.x,b.y-pred.y);if(d<bd){bd=d;best=b;}}
+  if(best&&bd<=r){
+    const dx=(best.x-trk.x)/k, dy=(best.y-trk.y)/k;
+    vel={x:vel.x*0.55+dx*0.45,y:vel.y*0.55+dy*0.45};
+    trk={x:best.x,y:best.y}; misses=0;
+    trail.push({x:best.x*sc,y:best.y*sc,t:now()});
+  }else misses++;
+  const out=pred.x<-5||pred.x>PW+5||pred.y<-5||pred.y>PH+5;
+  if(misses>14||out||performance.now()-flightStart>12000) endFlight();
+}
+function procLoop(g){
+  const schedule=()=>{ if(g!==gen)return; if(live.requestVideoFrameCallback) live.requestVideoFrameCallback(step); else requestAnimationFrame(step); };
+  const step=()=>{
+    if(g!==gen)return;
+    if(live.readyState>=2&&(mode==='armed'||mode==='flight')){
+      grab();
+      if(nFrames>=3){ if(mode==='armed')detectStart(); else track(); }
+    }
+    fpsCount++; schedule();
+  };
+  schedule();
+}
+
+/* ---------- Armer / enregistrer ---------- */
+function arm(){
+  if(!ball){toast('Pose d\'abord les <b>Repères</b> (balle puis green).');return;}
+  trail=[];land=null;lastRes=null;cand=null;nFrames=0;noted=false;manualDrawn=false;resEl.classList.add('trHide');
+  const A=AP(); teePos=A.pos?{...A.pos}:null; teeHeading=heading; teeHole=A.h;
+  chunks=[];
+  try{
+    const mt=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'].find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t));
+    recorder=new MediaRecorder(stream,mt?{mimeType:mt,videoBitsPerSecond:8e6}:undefined);
+    recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+    recorder.onstop=()=>{if(replayUrl)URL.revokeObjectURL(replayUrl);replayUrl=chunks.length?URL.createObjectURL(new Blob(chunks,{type:recorder.mimeType||'video/webm'})):null;renderBar();};
+    recorder.start(250);
+  }catch(e){recorder=null;}
+  recStart=performance.now();
+  mode='armed'; setStatus('⏳ En attente du coup… va frapper !');
+  renderBar(); toast('Armé ✅<br>Va frapper, la page détecte le départ de la balle.');
+}
+function stopRec(){try{if(recorder&&recorder.state!=='inactive')recorder.stop();}catch(e){}}
+function endFlight(){
+  mode='done'; stopRec();
+  land=trail.length?{x:trail[trail.length-1].x,y:trail[trail.length-1].y}:null;
+  setStatus(trail.length>3?'✅ Coup tracé':'⚠️ Balle perdue vite');
+  compute(); renderBar();
+  if(trail.length<=3)toast('Balle perdue tôt.<br>Utilise <b>Tracer à la main</b> ou <b>Corriger la chute</b>.',3500);
+}
+function cancelArm(){
+  stopRec();
+  if(mode==='flight'){endFlight();return;}
+  mode=ball?'ready':'idle'; setStatus('Arrêté'); renderBar();
+}
+
+/* ---------- Calcul distance / direction ---------- */
+function compute(){
+  if(!land){resEl.classList.add('trHide');return;}
+  const r0=Math.max(0.5,+S.r0||3);
+  const G=greenOf(teeHole);
+  let r1=null,bearing=null,src='';
+  if(G&&teePos){r1=dist2(teePos,G);bearing=bear(teePos,G);src='GPS · trou '+(teeHole+1);}
+  else{const td=teeDist(teeHole);if(td)r1=r0+td;src='distance du départ (GPS absent)';}
+  if(bearing==null&&teeHeading!=null)bearing=teeHeading;
+  if(!greenPt||!r1){
+    resEl.innerHTML='<div class="trSub">Trajectoire tracée.</div><div class="trSmall">Pour la distance, pose le repère du green (Repères).</div>';
+    resEl.classList.remove('trHide');lastRes=null;return;
+  }
+  if(greenPt.y>=ball.y-3){
+    resEl.innerHTML='<div class="trSub">Le repère du green doit être plus haut que la balle à l\'écran.</div><div class="trSmall">Refais les Repères.</div>';
+    resEl.classList.remove('trHide');lastRes=null;return;
+  }
+  const k=(ball.y-greenPt.y)/(1/r0-1/r1), yh=greenPt.y-k/r1;
+  const r=land.y>yh+0.5?k/(land.y-yh):Infinity;
+  if(!isFinite(r)||r>450){
+    resEl.innerHTML='<div class="trBig">&gt; 300 m ?</div><div class="trSub">Point de chute trop près de l\'horizon</div><div class="trSmall">Corrige la chute : touche l\'endroit où la balle a touché le sol.</div>';
+    resEl.classList.remove('trHide');lastRes=null;return;
+  }
+  const f=(vw/2)/Math.tan((+S.fov||66)*R_/2);
+  const tt=(land.y-ball.y)/(greenPt.y-ball.y), xl=ball.x+tt*(greenPt.x-ball.x);
+  const dist=Math.max(0,r-r0), lat=(land.x-xl)*r/f;
+  const err=Math.round(Math.min(80,3*r*r/k+dist*0.08)/5)*5||5;
+  const side=Math.abs(lat)<3?'dans l\'axe du green':Math.round(Math.abs(lat))+' m à '+(lat>0?'droite':'gauche')+' de la ligne du green';
+  const target=(teePos&&bearing!=null)?dest(dest(teePos,bearing,r),bearing+90,lat):null;
+  lastRes={dist,lat,target};
+  let club='';try{club=adv().c||'';}catch(e){}
+  let html=`<div class="trBig">≈ ${Math.round(dist)} m</div><div class="trSub">${side}</div><div class="trSmall">Estimation ± ${err} m · ${src}</div>`;
+  if(target)html+=`<div class="trWalk" id="trWalkTxt"></div><a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${target.lat.toFixed(6)},${target.lon.toFixed(6)}&travelmode=walking">🚶 Y aller</a> `;
+  html+=noted?'<div class="trSmall">✔ Coup noté</div>':`<button class="trOk" id="trNote">✔ Noter ce coup${club?' ('+club+')':''}</button>`;
+  resEl.innerHTML=html;resEl.classList.remove('trHide');
+  const nb=$('trNote'); if(nb)nb.onclick=e=>{e.stopPropagation();noteShot();};
+  updateWalk();
+}
+function noteShot(){
+  if(!lastRes||noted)return;
+  try{
+    let club='';try{club=adv().c||CN[0];}catch(e){club='';}
+    SH.push({club:club,d:Math.round(lastRes.dist),h:teeHole,t:Date.now()});sv2();
+    noted=true;compute();toast('Coup noté ✔<br>Tu peux changer le club dans « Mesure de coup ».');
+  }catch(e){toast('Impossible de noter le coup.');}
+}
+function updateWalk(){
+  const w=$('trWalkTxt'), p=AP().pos;
+  if(!w||!lastRes||!lastRes.target||!p)return;
+  const d=dist2(p,lastRes.target);
+  w.textContent=d<8?'📍 Tu es dans la zone, cherche autour !':'Zone de chute à '+Math.round(d)+' m de toi';
+}
+setInterval(()=>{if(opened)updateWalk();},2000);
+
+/* ---------- Dessin ---------- */
+function geom(){const W=ov.clientWidth,H=ov.clientHeight,s=Math.min(W/vw,H/vh);return{W,H,s,ox:(W-vw*s)/2,oy:(H-vh*s)/2};}
+function label(t,x,y){octx.font='600 13px system-ui,sans-serif';octx.lineWidth=3;octx.strokeStyle='#000a';octx.strokeText(t,x,y);octx.fillStyle='#fff';octx.fillText(t,x,y);}
+function drawLoop(){
+  if(!opened){drawing=false;return;}
+  const dpr=window.devicePixelRatio||1, G=geom();
+  if(ov.width!==Math.round(G.W*dpr)||ov.height!==Math.round(G.H*dpr)){ov.width=Math.round(G.W*dpr);ov.height=Math.round(G.H*dpr);}
+  octx.setTransform(dpr,0,0,dpr,0,0); octx.clearRect(0,0,G.W,G.H);
+  const P=p=>[G.ox+p.x*G.s,G.oy+p.y*G.s];
+  if(ball&&greenPt){const a=P(ball),b=P(greenPt);octx.setLineDash([6,8]);octx.strokeStyle='#ffffff70';octx.lineWidth=1.5;octx.beginPath();octx.moveTo(a[0],a[1]);octx.lineTo(b[0],b[1]);octx.stroke();octx.setLineDash([]);}
+  if(ball){const a=P(ball);octx.strokeStyle='#fff';octx.lineWidth=2;octx.beginPath();octx.arc(a[0],a[1],12,0,7);octx.stroke();label('Balle',a[0]+15,a[1]+4);}
+  if(greenPt){const a=P(greenPt);octx.strokeStyle='#ffd23f';octx.lineWidth=2;octx.beginPath();octx.moveTo(a[0],a[1]);octx.lineTo(a[0],a[1]-26);octx.stroke();octx.fillStyle='#ffd23f';octx.beginPath();octx.moveTo(a[0],a[1]-26);octx.lineTo(a[0]+16,a[1]-20);octx.lineTo(a[0],a[1]-14);octx.fill();label('Green',a[0]+18,a[1]-4);}
+  let pts=trail, full=true;
+  if(showing==='replay'&&trail.length&&!manualDrawn){const tm=rep.currentTime*1000+40;pts=trail.filter(p=>p.t<=tm);full=pts.length===trail.length;}
+  if(pts.length>1){
+    const sp=pts.map(P);
+    octx.lineCap='round';octx.lineJoin='round';octx.shadowColor='#ff0000';octx.shadowBlur=12;
+    octx.strokeStyle='#ff2020';octx.lineWidth=4;
+    octx.beginPath();octx.moveTo(sp[0][0],sp[0][1]);
+    for(let i=1;i<sp.length-1;i++){const mx=(sp[i][0]+sp[i+1][0])/2,my=(sp[i][1]+sp[i+1][1])/2;octx.quadraticCurveTo(sp[i][0],sp[i][1],mx,my);}
+    const l=sp[sp.length-1];octx.lineTo(l[0],l[1]);octx.stroke();octx.shadowBlur=0;
+    octx.fillStyle='#fff';octx.beginPath();octx.arc(l[0],l[1],3.5,0,7);octx.fill();
+  }
+  if(land&&full&&(mode==='done'||mode==='pickLand'||mode==='manual')){
+    const a=P(land),t=performance.now()/300;
+    octx.strokeStyle='#ff4a4a';octx.lineWidth=2.5;
+    octx.beginPath();octx.arc(a[0],a[1],14+3*Math.sin(t),0,7);octx.stroke();
+    octx.beginPath();octx.moveTo(a[0]-7,a[1]-7);octx.lineTo(a[0]+7,a[1]+7);octx.moveTo(a[0]+7,a[1]-7);octx.lineTo(a[0]-7,a[1]+7);octx.stroke();
+    label('Chute',a[0]+18,a[1]+4);
+  }
+  for(const m of manualPts){const a=P(m);octx.fillStyle='#ff4a4a';octx.beginPath();octx.arc(a[0],a[1],6,0,7);octx.fill();}
+  requestAnimationFrame(drawLoop);
+}
+
+/* ---------- Touchers ---------- */
+function toVideo(cx,cy){
+  const el=showing==='replay'?rep:live, rect=el.getBoundingClientRect(), G=geom();
+  const nx=(cx-rect.left)/rect.width*G.W, ny=(cy-rect.top)/rect.height*G.H;
+  return{x:(nx-G.ox)/G.s,y:(ny-G.oy)/G.s};
+}
+$('trStage').addEventListener('pointerdown',e=>{
+  const p=toVideo(e.clientX,e.clientY);
+  if(p.x<0||p.y<0||p.x>vw||p.y>vh)return;
+  if(mode==='pickBall'){ball=p;greenPt=null;mode='pickGreen';setStatus('② Touche l\'entrée du green');toast('Maintenant touche l\'<b>entrée du green</b>',0);renderBar();}
+  else if(mode==='pickGreen'){greenPt=p;mode='ready';hideToast();setStatus('Prêt · touche ● Armer');renderBar();}
+  else if(mode==='pickLand'){land=p;mode='done';hideToast();setStatus('✅ Chute corrigée');compute();renderBar();}
+  else if(mode==='manual'){
+    manualPts.push(p);
+    if(manualPts.length===1)toast('Touche maintenant le <b>point de chute</b>',0);
+    if(manualPts.length===2){
+      const P0=ball,A=manualPts[0],P2=manualPts[1];
+      const C={x:2*A.x-(P0.x+P2.x)/2,y:2*A.y-(P0.y+P2.y)/2};
+      trail=[];for(let i=0;i<=40;i++){const t=i/40,u=1-t;trail.push({x:u*u*P0.x+2*u*t*C.x+t*t*P2.x,y:u*u*P0.y+2*u*t*C.y+t*t*P2.y,t:0});}
+      land={x:P2.x,y:P2.y};manualPts=[];manualDrawn=true;mode='done';hideToast();setStatus('✏️ Trajectoire tracée à la main');compute();renderBar();
+    }
+  }
+});
+
+/* ---------- Revoir / zoom ---------- */
+function showReplay(on){
+  showing=on&&replayUrl?'replay':'live';
+  if(showing==='replay'){
+    if(rep.src!==replayUrl)rep.src=replayUrl;
+    rep.classList.remove('trHide');live.classList.add('trHide');
+    rep.playbackRate=slow?0.25:1;rep.currentTime=0;rep.play().catch(()=>{});
+  }else{rep.pause();rep.classList.add('trHide');live.classList.remove('trHide');}
+  renderBar();
+}
+function cycleZoom(){
+  zoom=zoom===1?2:zoom===2?4:1;
+  const G=geom(), c=land||ball;
+  if(c)wrap.style.transformOrigin=(G.ox+c.x*G.s)+'px '+(G.oy+c.y*G.s)+'px';
+  wrap.style.transform=zoom===1?'':'scale('+zoom+')';
+  renderBar();
+}
+function resetZoom(){zoom=1;wrap.style.transform='';}
+
+/* ---------- Boutons ---------- */
+function btn(txt,fn,cls){const b=document.createElement('button');b.textContent=txt;if(cls)b.className=cls;b.onclick=e=>{e.stopPropagation();fn();};bar.appendChild(b);}
+function newShot(){mode=ball&&greenPt?'ready':'idle';trail=[];land=null;manualDrawn=false;lastRes=null;noted=false;resEl.classList.add('trHide');resetZoom();showReplay(false);setStatus(mode==='ready'?'Prêt · touche ● Armer':'① Pose les repères');renderBar();}
+function renderBar(){
+  bar.innerHTML='';
+  if(mode==='idle'||mode==='ready'){
+    btn('⚙️',()=>openPanel('trSettings'));
+    btn('❔',()=>openPanel('trHelp'));
+    btn('① Repères',()=>{mode='pickBall';trail=[];land=null;manualDrawn=false;resEl.classList.add('trHide');resetZoom();showReplay(false);setStatus('① Touche la balle');toast('Touche la <b>balle</b> sur l\'image',0);renderBar();});
+    btn('● Armer',arm,'trMain');
+  }else if(mode==='pickBall'||mode==='pickGreen'){
+    btn('Annuler',()=>{mode=ball&&greenPt?'ready':'idle';hideToast();setStatus('Annulé');renderBar();});
+  }else if(mode==='armed'||mode==='flight'){
+    btn('■ Stop',cancelArm,'trMain');
+  }else if(mode==='done'){
+    if(replayUrl)btn(showing==='replay'?'📹 Direct':'▶ Revoir',()=>showReplay(showing!=='replay'));
+    if(showing==='replay')btn(slow?'Vitesse ×1':'Ralenti ×¼',()=>{slow=!slow;rep.playbackRate=slow?0.25:1;renderBar();});
+    btn('🔍 ×'+zoom,cycleZoom);
+    btn('Corriger la chute',()=>{mode='pickLand';setStatus('Touche le point de chute');toast('Touche l\'endroit où la balle a <b>touché le sol</b>',0);renderBar();});
+    btn('Tracer à la main',()=>{mode='manual';manualPts=[];setStatus('Tracé manuel');toast('Touche le <b>sommet</b> de la trajectoire',0);renderBar();});
+    btn('Nouveau coup',newShot,'trOk');
+  }else if(mode==='pickLand'||mode==='manual'){
+    btn('Annuler',()=>{mode='done';manualPts=[];hideToast();renderBar();});
+  }
+}
+
+/* ---------- Panneaux ---------- */
+function openPanel(id){
+  if(id==='trSettings'){
+    $('trR0').value=S.r0;$('trFov').value=S.fov;$('trSens').value=S.sens;$('trSensV').textContent=S.sens;
+    const i=AP().h;$('trAutoInfo').innerHTML='Distance au green : <b>automatique</b> (trou '+(i+1)+', green de l\'appli).';
+  }
+  $(id).classList.remove('trHide');
+}
+$('trSens').oninput=e=>{$('trSensV').textContent=e.target.value;};
+root.querySelectorAll('[data-trclose]').forEach(b=>b.onclick=()=>{
+  const id=b.dataset.trclose;
+  if(id==='trSettings'){S.r0=+$('trR0').value||3;S.fov=+$('trFov').value||66;S.sens=+$('trSens').value||20;save();if(mode==='done')compute();}
+  $(id).classList.add('trHide');
+});
+$('trHelpStart').onclick=()=>openPanel('trHelp');
+
+/* ---------- Ouvrir / fermer depuis l'appli ---------- */
+window.openTracer=function(){
+  const A=AP();
+  let nm='';try{nm=' · '+NM[A.h];}catch(e){}
+  $('trHole').innerHTML='Trou <b>'+(A.h+1)+'</b>'+nm+(A.pos?' · GPS ✔':' · GPS en attente');
+  $('trStart').classList.remove('trHide');
+  root.classList.remove('trHide');
+  document.body.style.overflow='hidden';
+  opened=true;
+};
+$('trGo').onclick=async()=>{
+  try{await root.requestFullscreen?.();await screen.orientation?.lock?.('landscape');}catch(e){}
+  try{if(typeof DeviceOrientationEvent!=='undefined'&&DeviceOrientationEvent.requestPermission)await DeviceOrientationEvent.requestPermission();}catch(e){}
+  const ok=await startCamera();
+  if(!ok)return;
+  $('trStart').classList.add('trHide');
+  ball=null;greenPt=null;mode='idle';newShot();
+  if(!drawing){drawing=true;requestAnimationFrame(drawLoop);}
+};
+$('trX').onclick=()=>{
+  stopCamera();showReplay(false);resetZoom();hideToast();
+  ['trSettings','trHelp'].forEach(id=>$(id).classList.add('trHide'));
+  mode='idle';ball=null;greenPt=null;trail=[];land=null;resEl.classList.add('trHide');
+  opened=false;root.classList.add('trHide');document.body.style.overflow='';
+  try{screen.orientation?.unlock?.();}catch(e){}
+  try{if(document.fullscreenElement)document.exitFullscreen();}catch(e){}
+  try{if(typeof rs==='function')rs();if(typeof upd==='function')upd();}catch(e){}
+};
+})();
+</script>
+<!-- ===== fin du traceur ===== -->
+
+</body></html>
